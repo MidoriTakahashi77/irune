@@ -117,6 +117,7 @@ export default function CalendarScreen() {
           ]}
           onPress={() => setShowDatePicker(true)}
           activeOpacity={0.7}
+          accessibilityLabel={t("calendar.jumpToDate")}
         >
           <Ionicons
             name="calendar-number-outline"
@@ -181,7 +182,7 @@ export default function CalendarScreen() {
                 }
               }}
             />
-            {Platform.OS === "ios" && (
+            {(Platform.OS === "ios" || Platform.OS === "web") && (
               <TouchableOpacity
                 style={[styles.datePickerDone, { backgroundColor: colors.primary }]}
                 onPress={() => setShowDatePicker(false)}

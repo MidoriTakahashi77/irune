@@ -117,7 +117,7 @@ export function DayDetailSheet({
   if (!visible && !isVisible.current) return null;
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+    <View style={[StyleSheet.absoluteFill, !visible && styles.hidden]} pointerEvents={visible ? "box-none" : "none"}>
       <Animated.View
         style={[styles.overlay, { opacity: overlayOpacity }]}
         pointerEvents={visible ? "auto" : "none"}
@@ -201,6 +201,7 @@ export function DayDetailSheet({
             ]}
             onPress={onAddEvent}
             activeOpacity={0.7}
+            accessibilityLabel={t("calendar.newEvent")}
           >
             <Ionicons name="add" size={20} color={colors.text} />
             <Text style={[styles.actionText, { color: colors.text }]}>
@@ -214,6 +215,9 @@ export function DayDetailSheet({
 }
 
 const styles = StyleSheet.create({
+  hidden: {
+    display: "none",
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.3)",

@@ -287,6 +287,7 @@ export default function NewEventScreen() {
             {EVENT_COLORS.map((c) => (
               <TouchableOpacity
                 key={c}
+                testID={`color-${c.replace("#", "")}`}
                 style={[
                   styles.colorCircle,
                   { backgroundColor: c },

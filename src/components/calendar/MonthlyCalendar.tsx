@@ -130,6 +130,7 @@ export function MonthlyCalendar({
         return (
           <TouchableOpacity
             onPress={() => onDayPress(dateStr)}
+            accessibilityLabel={`day-${dateStr}`}
             style={[
               styles.dayContainer,
               { minHeight: cellMinHeight },
@@ -167,6 +168,8 @@ export function MonthlyCalendar({
                 return (
                   <View
                     key={de.event.id}
+                    accessible={true}
+                    accessibilityLabel={de.event.title}
                     style={[
                       styles.eventBadge,
                       { backgroundColor: bgColor },
