@@ -45,8 +45,7 @@ CREATE TABLE events (
   end_at TIMESTAMPTZ NOT NULL,
   all_day BOOLEAN NOT NULL DEFAULT false,
   notes TEXT,
-  reminder BOOLEAN NOT NULL DEFAULT false,
-  reminder_minutes INT,
+  reminders INT[] NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
