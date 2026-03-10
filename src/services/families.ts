@@ -1,10 +1,10 @@
+import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabase";
 
 export async function createFamily(name: string) {
-  const inviteCode = generateInviteCode();
   const { data, error } = await supabase
     .from("families")
-    .insert({ name, invite_code: inviteCode })
+    .insert({ name })
     .select()
     .single();
 
@@ -12,11 +12,11 @@ export async function createFamily(name: string) {
   return data;
 }
 
-export async function joinFamily(inviteCode: string) {
+export async function fetchFamily(familyId: string) {
   const { data, error } = await supabase
     .from("families")
     .select()
-    .eq("invite_code", inviteCode.toUpperCase())
+    .eq("id", familyId)
     .single();
 
   if (error) throw error;
@@ -33,11 +33,60 @@ export async function fetchFamilyMembers(familyId: string) {
   return data;
 }
 
-function generateInviteCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+export async function sendFamilyInvite(
+  email: string,
+  familyId: string
+) {
+  const redirectTo = Linking.createURL(`/invite`, {
+    queryParams: { family_id: familyId },
+  });
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectTo },
+  });
+
+  if (error) throw error;
+}
+
+const CHILD_COLORS = [
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#96CEB4",
+  "#FFEAA7",
+  "#DDA0DD",
+  "#98D8C8",
+  "#F7DC6F",
+];
+
+export async function addManagedMember(
+  familyId: string,
+  managedBy: string,
+  displayName: string
+) {
+  const color =
+    CHILD_COLORS[Math.floor(Math.random() * CHILD_COLORS.length)];
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({
+      family_id: familyId,
+      display_name: displayName,
+      managed_by: managedBy,
+      role: "member",
+      color,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteManagedMember(memberId: string) {
+  const { error } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("id", memberId);
+  if (error) throw error;
 }

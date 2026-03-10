@@ -51,21 +51,43 @@
   },
   "auth": {
     "login": "Login",
-    "register": "Register",
     "email": "Email",
-    "password": "Password",
     "displayName": "Display Name",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
+    "setDisplayName": "Set your display name",
+    "sendMagicLink": "Send login link",
+    "checkEmail": "Check your email",
+    "magicLinkSent": "We sent a login link to {{email}}. Tap the link in your email to sign in.",
+    "resend": "Resend",
+    "otpCode": "Verification code",
+    "verify": "Verify",
     "createFamily": "Create Family",
-    "joinFamily": "Join Family",
     "familyName": "Family Name",
-    "inviteCode": "Invite Code",
-    "generation": "Generation",
-    "parent": "Parent",
-    "grandparent": "Grandparent",
-    "child": "Child",
+    "joinFamily": "Join an existing family",
     "logout": "Logout"
+  },
+  "relationship": {
+    "selectRole": "What is your relationship in the family?",
+    "spouse": "Spouse",
+    "father": "Father",
+    "mother": "Mother",
+    "grandpa": "Grandfather",
+    "grandma": "Grandmother",
+    "son": "Son",
+    "daughter": "Daughter",
+    "brother": "Brother",
+    "sister": "Sister",
+    "other": "Other",
+    "customLabel": "Custom label",
+    "customLabelPlaceholder": "e.g. Uncle, Aunt",
+    "birthOrder": "Birth order?",
+    "birthOrderLabel": "{{order}}"
+  },
+  "managedMember": {
+    "title": "Add a child",
+    "childName": "Child's name",
+    "add": "Add",
+    "skip": "Add later",
+    "added": "Added {{name}}"
   },
   "common": {
     "save": "Save",
@@ -88,7 +110,8 @@
     "title": "Settings",
     "profile": "Profile",
     "familyMembers": "Family Members",
-    "inviteCode": "Invite Code",
-    "shareInvite": "Share Invite Code"
+    "inviteMember": "Invite Family Member",
+    "inviteEmail": "Email to invite",
+    "inviteSent": "Invitation sent to {{email}}"
   }
 }

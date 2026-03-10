@@ -24,18 +24,27 @@ export const diarySchema = z.object({
 
 export type DiaryFormData = z.infer<typeof diarySchema>;
 
-export const loginSchema = z.object({
+export const magicLinkSchema = z.object({
   email: z.string().email("有効なメールアドレスを入力してください"),
-  password: z.string().min(6, "パスワードは6文字以上にしてください"),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type MagicLinkFormData = z.infer<typeof magicLinkSchema>;
 
-export const registerSchema = z.object({
-  email: z.string().email("有効なメールアドレスを入力してください"),
-  password: z.string().min(6, "パスワードは6文字以上にしてください"),
+export const displayNameSchema = z.object({
   displayName: z.string().min(1, "表示名を入力してください"),
-  generation: z.enum(["parent", "grandparent", "child"]),
 });
 
-export type RegisterFormData = z.infer<typeof registerSchema>;
+export type DisplayNameFormData = z.infer<typeof displayNameSchema>;
+
+export const relationshipSchema = z.object({
+  relationship: z.enum(["spouse", "father", "mother", "grandpa", "grandma", "son", "daughter", "brother", "sister", "other"]),
+  relationshipLabel: z.string().optional(),
+});
+
+export type RelationshipFormData = z.infer<typeof relationshipSchema>;
+
+export const managedMemberSchema = z.object({
+  displayName: z.string().min(1, "名前を入力してください"),
+});
+
+export type ManagedMemberFormData = z.infer<typeof managedMemberSchema>;

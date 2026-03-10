@@ -16,4 +16,14 @@ export type FamilyRow = Database["public"]["Tables"]["families"]["Row"];
 
 export type EventCategory = "health" | "family" | "errands" | "social";
 export type NoteType = "free" | "my_letter" | "evacuation" | "house";
-export type Generation = "parent" | "grandparent" | "child";
+export type Relationship =
+  | "spouse"
+  | "father"
+  | "mother"
+  | "grandpa"
+  | "grandma"
+  | "son"
+  | "daughter"
+  | "brother"
+  | "sister"
+  | "other";

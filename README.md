@@ -4,7 +4,7 @@
 
 ## 技術スタック
 
-- **フレームワーク**: Expo SDK 55 (React Native) + Expo Router v7
+- **フレームワーク**: Expo SDK 52 (React Native) + Expo Router v4
 - **バックエンド**: Supabase (Auth / PostgreSQL / Realtime / Storage)
 - **状態管理**: TanStack Query v5 + Zustand
 - **フォーム**: React Hook Form + Zod v3
@@ -31,8 +31,8 @@ bun install
 # ローカルSupabaseの起動 (Docker必須)
 supabase start
 
-# マイグレーション適用 (初回 or スキーマ変更時)
-supabase db reset
+# マイグレーション適用
+supabase migration up
 ```
 
 `supabase start` の出力からAPI URLとanon keyをコピーし、`.env` を更新:

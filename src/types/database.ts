@@ -13,19 +13,16 @@ export interface Database {
         Row: {
           id: string;
           name: string;
-          invite_code: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
-          invite_code: string;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
-          invite_code?: string;
           created_at?: string;
         };
       };
@@ -37,16 +34,20 @@ export interface Database {
           avatar_url: string | null;
           role: string;
           color: string;
-          generation: string;
+          relationship: string;
+          relationship_label: string | null;
+          managed_by: string | null;
         };
         Insert: {
-          id: string;
+          id?: string;
           family_id?: string | null;
           display_name: string;
           avatar_url?: string | null;
           role?: string;
           color?: string;
-          generation?: string;
+          relationship?: string;
+          relationship_label?: string | null;
+          managed_by?: string | null;
         };
         Update: {
           id?: string;
@@ -55,7 +56,9 @@ export interface Database {
           avatar_url?: string | null;
           role?: string;
           color?: string;
-          generation?: string;
+          relationship?: string;
+          relationship_label?: string | null;
+          managed_by?: string | null;
         };
       };
       events: {

@@ -1,31 +1,22 @@
 import { useEffect } from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-export default function IndexScreen() {
+export default function AuthCallbackScreen() {
   const router = useRouter();
-  const { session, profile, loading, pendingFamilyId } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
 
   useEffect(() => {
-    if (loading) return;
-
-    if (!session) {
-      router.replace("/(auth)/login");
-    } else if (!profile) {
-      router.replace("/(auth)/set-profile");
-    } else if (pendingFamilyId) {
-      router.replace("/(auth)/join-family");
-    } else if (!profile.family_id) {
-      router.replace("/(auth)/create-family");
-    } else {
-      router.replace("/(tabs)");
-    }
-  }, [session, profile, loading, pendingFamilyId]);
+    // Supabase client will automatically detect the session from the URL hash
+    // (detectSessionInUrl: true on web). Give it a moment, then redirect.
+    const timeout = setTimeout(() => {
+      router.replace("/");
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

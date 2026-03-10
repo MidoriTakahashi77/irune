@@ -10,7 +10,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "irune",
   userInterfaceStyle: "automatic",
   ios: {
-    icon: "./assets/expo.icon",
     bundleIdentifier: "com.irune.app",
   },
   android: {
@@ -30,6 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-router",
     "expo-localization",
     "expo-secure-store",
+    "expo-font",
     [
       "expo-splash-screen",
       {
@@ -52,7 +52,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ],
   experiments: {
     typedRoutes: true,
-    reactCompiler: true,
   },
   extra: {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,

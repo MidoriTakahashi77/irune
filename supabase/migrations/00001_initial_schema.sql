@@ -2,20 +2,37 @@
 CREATE TABLE families (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  invite_code TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- profiles table (extends auth.users)
+-- profiles table
+-- Self-registered users have id = auth.users.id
+-- Managed members (children etc.) have id = gen_random_uuid() and managed_by set
 CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   family_id UUID REFERENCES families(id),
   display_name TEXT NOT NULL,
   avatar_url TEXT,
   role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
   color TEXT NOT NULL DEFAULT '#4ECDC4',
-  generation TEXT NOT NULL DEFAULT 'parent' CHECK (generation IN ('parent', 'grandparent', 'child'))
+  relationship TEXT NOT NULL DEFAULT 'other' CHECK (relationship IN ('spouse', 'father', 'mother', 'grandpa', 'grandma', 'son', 'daughter', 'brother', 'sister', 'other')),
+  relationship_label TEXT,
+  birth_order INT,
+  managed_by UUID REFERENCES profiles(id) ON DELETE CASCADE
 );
+
+-- Cascade delete profile when auth user is deleted
+CREATE OR REPLACE FUNCTION handle_auth_user_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM profiles WHERE id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_deleted
+  BEFORE DELETE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_auth_user_delete();
 
 -- events table
 CREATE TABLE events (
@@ -88,6 +105,7 @@ $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 CREATE INDEX idx_events_family_start ON events(family_id, start_at);
 CREATE INDEX idx_diary_entries_family_date ON diary_entries(family_id, entry_date);
 CREATE INDEX idx_profiles_family ON profiles(family_id);
+CREATE INDEX idx_profiles_managed_by ON profiles(managed_by);
 CREATE INDEX idx_notes_family ON notes(family_id);
 
 -- ============================================
@@ -102,10 +120,11 @@ ALTER TABLE diary_media ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_contacts ENABLE ROW LEVEL SECURITY;
 
--- families: members can read their own family
-CREATE POLICY "Users can view own family"
+-- families: members can read their own family, or any family (needed during creation before profile.family_id is set)
+CREATE POLICY "Authenticated users can view families"
   ON families FOR SELECT
-  USING (id = get_user_family_id());
+  TO authenticated
+  USING (true);
 
 CREATE POLICY "Authenticated users can create families"
   ON families FOR INSERT
@@ -117,14 +136,18 @@ CREATE POLICY "Users can view family members"
   ON profiles FOR SELECT
   USING (family_id = get_user_family_id() OR id = auth.uid());
 
-CREATE POLICY "Users can insert own profile"
+CREATE POLICY "Users can insert profiles"
   ON profiles FOR INSERT
   TO authenticated
-  WITH CHECK (id = auth.uid());
+  WITH CHECK (id = auth.uid() OR managed_by = auth.uid());
 
-CREATE POLICY "Users can update own profile"
+CREATE POLICY "Users can update own or managed profiles"
   ON profiles FOR UPDATE
-  USING (id = auth.uid());
+  USING (id = auth.uid() OR managed_by = auth.uid());
+
+CREATE POLICY "Users can delete managed members"
+  ON profiles FOR DELETE
+  USING (managed_by = auth.uid());
 
 -- events: family-scoped CRUD
 CREATE POLICY "Users can view family events"

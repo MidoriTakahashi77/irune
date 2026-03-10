@@ -1,53 +1,142 @@
 import { useState } from "react";
 import {
-  View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { loginSchema, type LoginFormData } from "@/utils/validation";
+import { magicLinkSchema, type MagicLinkFormData } from "@/utils/validation";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { sendMagicLink, verifyOtp } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sentEmail, setSentEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  } = useForm<MagicLinkFormData>({
+    resolver: zodResolver(magicLinkSchema),
+    defaultValues: { email: "" },
   });
 
-  async function onSubmit(data: LoginFormData) {
+  async function onSubmit(data: MagicLinkFormData) {
     setLoading(true);
     setError("");
     try {
-      await signIn(data.email, data.password);
+      await sendMagicLink(data.email);
+      setSentEmail(data.email);
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleVerifyOtp() {
+    if (otpCode.length !== 6) return;
+    setLoading(true);
+    setError("");
+    try {
+      await verifyOtp(sentEmail, otpCode);
+      router.replace("/");
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    setLoading(true);
+    setError("");
+    try {
+      await sendMagicLink(sentEmail);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (sentEmail) {
+    return (
+      <SafeAreaView
+        style={[styles.safe, { backgroundColor: colors.background }]}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.flex}
+        >
+          <ScrollView
+            contentContainerStyle={styles.sentContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Ionicons
+              name="mail-outline"
+              size={64}
+              color={colors.primary}
+            />
+            <Text style={[styles.sentTitle, { color: colors.text }]}>
+              {t("auth.checkEmail")}
+            </Text>
+            <Text style={[styles.sentMessage, { color: colors.textSecondary }]}>
+              {t("auth.magicLinkSent", { email: sentEmail })}
+            </Text>
+
+            {error ? (
+              <Text style={[styles.error, { color: colors.error }]}>
+                {error}
+              </Text>
+            ) : null}
+
+            <View style={styles.otpSection}>
+              <Input
+                label={t("auth.otpCode")}
+                value={otpCode}
+                onChangeText={setOtpCode}
+                keyboardType="number-pad"
+                maxLength={6}
+                placeholder="000000"
+              />
+              <Button
+                title={t("auth.verify")}
+                onPress={handleVerifyOtp}
+                loading={loading}
+                disabled={otpCode.length !== 6}
+              />
+            </View>
+
+            <Button
+              title={t("auth.resend")}
+              onPress={handleResend}
+              variant="ghost"
+              loading={loading}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -88,34 +177,11 @@ export default function LoginScreen() {
             )}
           />
 
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label={t("auth.password")}
-                value={value}
-                onChangeText={onChange}
-                secureTextEntry
-                error={errors.password?.message}
-              />
-            )}
-          />
-
           <Button
-            title={t("auth.login")}
+            title={t("auth.sendMagicLink")}
             onPress={handleSubmit(onSubmit)}
             loading={loading}
           />
-
-          <TouchableOpacity
-            onPress={() => router.push("/(auth)/register")}
-            style={styles.link}
-          >
-            <Text style={[styles.linkText, { color: colors.primary }]}>
-              {t("auth.noAccount")}
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -146,11 +212,26 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     fontSize: FontSize.sm,
   },
-  link: {
-    marginTop: Spacing.lg,
+  sentContainer: {
+    flexGrow: 1,
     alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.lg,
+    gap: Spacing.md,
   },
-  linkText: {
+  sentTitle: {
+    fontSize: FontSize.xl,
+    fontWeight: "bold",
+    marginTop: Spacing.md,
+  },
+  sentMessage: {
     fontSize: FontSize.md,
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  otpSection: {
+    width: "100%",
+    marginTop: Spacing.md,
+    gap: Spacing.sm,
   },
 });
