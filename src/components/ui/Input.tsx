@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import {
   TextInput,
   Text,
@@ -13,7 +14,10 @@ interface InputProps extends TextInputProps {
   error?: string;
 }
 
-export function Input({ label, error, style, ...props }: InputProps) {
+export const Input = forwardRef<TextInput, InputProps>(function Input(
+  { label, error, style, ...props },
+  ref
+) {
   const scheme = useColorScheme();
   const colors = Colors[scheme];
 
@@ -25,6 +29,7 @@ export function Input({ label, error, style, ...props }: InputProps) {
         </Text>
       )}
       <TextInput
+        ref={ref}
         style={[
           styles.input,
           {
@@ -42,7 +47,7 @@ export function Input({ label, error, style, ...props }: InputProps) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

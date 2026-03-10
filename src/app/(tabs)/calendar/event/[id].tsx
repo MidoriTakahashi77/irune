@@ -1,29 +1,22 @@
-import { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  useEvent,
-  useDeleteEvent,
-  useUpdateEvent,
-} from "@/hooks/useEvents";
+import { useEvent, useDeleteEvent } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
-import { CATEGORY_CONFIG } from "@/constants/categories";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { formatDateTime } from "@/utils/date";
-import type { EventCategory } from "@/types/events";
+import { REMINDER_PRESETS } from "@/constants/reminders";
+
+function formatReminderLabel(minutes: number, t: (key: string) => string): string {
+  const preset = REMINDER_PRESETS.find((p) => p.minutes === minutes);
+  if (preset) return t(preset.labelKey);
+  return `${minutes}${t("event.reminderMinutes")}`;
+}
 
 export default function EventDetailScreen() {
   const { t } = useTranslation();
@@ -78,9 +71,8 @@ export default function EventDetailScreen() {
     );
   }
 
-  const category = event.category as EventCategory;
-  const config = CATEGORY_CONFIG[category];
   const isOwner = profile?.id === event.created_by;
+  const reminders: number[] = event.reminders ?? [];
 
   return (
     <SafeAreaView
@@ -96,15 +88,6 @@ export default function EventDetailScreen() {
         </View>
 
         <Card style={styles.card}>
-          <View style={styles.categoryBadge}>
-            <View
-              style={[styles.dot, { backgroundColor: config?.color }]}
-            />
-            <Text style={[styles.categoryLabel, { color: colors.textSecondary }]}>
-              {config?.label}
-            </Text>
-          </View>
-
           <Text style={[styles.title, { color: colors.text }]}>
             {event.title}
           </Text>
@@ -122,9 +105,26 @@ export default function EventDetailScreen() {
             </Text>
           </View>
 
+          {reminders.length > 0 && (
+            <View style={styles.infoRow}>
+              <Ionicons
+                name="notifications-outline"
+                size={18}
+                color={colors.textSecondary}
+              />
+              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                {reminders
+                  .map((m) => formatReminderLabel(m, t))
+                  .join("、")}
+              </Text>
+            </View>
+          )}
+
           {event.notes ? (
             <View style={styles.notesSection}>
-              <Text style={[styles.notesLabel, { color: colors.textSecondary }]}>
+              <Text
+                style={[styles.notesLabel, { color: colors.textSecondary }]}
+              >
                 {t("event.notes")}
               </Text>
               <Text style={[styles.notesText, { color: colors.text }]}>
@@ -161,20 +161,6 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: Spacing.lg,
   },
-  categoryBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  categoryLabel: {
-    fontSize: FontSize.sm,
-  },
   title: {
     fontSize: FontSize.xl,
     fontWeight: "bold",
@@ -188,6 +174,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: FontSize.md,
+    flex: 1,
   },
   notesSection: {
     marginTop: Spacing.md,
