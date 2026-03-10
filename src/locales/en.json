@@ -130,6 +130,12 @@
     "familyMembers": "Family Members",
     "inviteMember": "Invite Family Member",
     "inviteEmail": "Email to invite",
-    "inviteSent": "Invitation sent to {{email}}"
+    "inviteSent": "Invitation sent to {{email}}",
+    "registerRequired": "You need to register to invite family members",
+    "registerEmail": "Register with email",
+    "registerEmailPlaceholder": "Enter your email",
+    "registerSent": "Verification email sent to {{email}}. Tap the link in the email to activate your account.",
+    "guestMode": "Using as guest",
+    "registerPrompt": "Register with email to invite family members and keep your data safe."
   }
 }

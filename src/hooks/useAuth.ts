@@ -51,11 +51,27 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const isAnonymous = session?.user?.is_anonymous ?? false;
+
   async function handleIncomingUrl(url: string) {
     // Extract family_id from invite links
     const parsed = Linking.parse(url);
     if (parsed.queryParams?.family_id) {
       setPendingFamilyId(parsed.queryParams.family_id as string);
+    }
+
+    // E2E test auth injection: irune://e2e-auth?access_token=...&refresh_token=...
+    if (url.includes("e2e-auth") && url.includes("access_token")) {
+      const params = new URLSearchParams(url.split("?")[1]);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        return;
+      }
     }
 
     // Extract tokens from magic link hash fragment
@@ -82,6 +98,44 @@ export function useAuth() {
       .single();
     setProfile(data);
     setLoading(false);
+  }
+
+  /**
+   * 匿名サインイン + プロフィール・家族を自動作成
+   */
+  async function signInAnonymously() {
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+    const user = data.user;
+    if (!user) throw new Error("Anonymous sign-in failed");
+
+    // 家族を作成
+    const { data: family, error: famErr } = await supabase
+      .from("families")
+      .insert({ name: "マイファミリー" })
+      .select()
+      .single();
+    if (famErr) throw famErr;
+
+    // プロフィールを作成
+    const { error: profErr } = await supabase.from("profiles").insert({
+      id: user.id,
+      family_id: family.id,
+      display_name: "ゲスト",
+      role: "admin",
+      color: getRandomColor(),
+    });
+    if (profErr) throw profErr;
+
+    await fetchProfile(user);
+  }
+
+  /**
+   * 匿名ユーザーをメールアドレスに紐付け（アカウントアップグレード）
+   */
+  async function linkEmail(email: string) {
+    const { error } = await supabase.auth.updateUser({ email });
+    if (error) throw error;
   }
 
   async function sendMagicLink(email: string) {
@@ -155,7 +209,10 @@ export function useAuth() {
     user: session?.user ?? null,
     profile,
     loading,
+    isAnonymous,
     pendingFamilyId,
+    signInAnonymously,
+    linkEmail,
     sendMagicLink,
     verifyOtp,
     setupProfile,

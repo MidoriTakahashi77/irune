@@ -130,6 +130,12 @@
     "familyMembers": "家族メンバー",
     "inviteMember": "家族を招待",
     "inviteEmail": "招待するメールアドレス",
-    "inviteSent": "{{email}} に招待を送信しました"
+    "inviteSent": "{{email}} に招待を送信しました",
+    "registerRequired": "家族を招待するにはアカウント登録が必要です",
+    "registerEmail": "メールアドレスで登録",
+    "registerEmailPlaceholder": "メールアドレスを入力",
+    "registerSent": "{{email}} に確認メールを送信しました。メールのリンクをタップしてアカウントを有効化してください。",
+    "guestMode": "ゲストモードで利用中",
+    "registerPrompt": "メールアドレスを登録すると、家族を招待したりデータを安全に保護できます。"
   }
 }
