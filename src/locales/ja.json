@@ -1,0 +1,94 @@
+{
+  "tabs": {
+    "home": "ホーム",
+    "notebook": "ノート",
+    "calendar": "カレンダー",
+    "emergency": "緊急"
+  },
+  "categories": {
+    "health": "通院・健康",
+    "family": "家族",
+    "errands": "用事",
+    "social": "交流"
+  },
+  "calendar": {
+    "title": "カレンダー",
+    "todaySchedule": "今日の予定",
+    "noEvents": "予定はありません",
+    "newEvent": "予定を追加",
+    "newDiary": "日記を書く",
+    "allDay": "終日"
+  },
+  "event": {
+    "title": "タイトル",
+    "titlePlaceholder": "予定のタイトル",
+    "category": "カテゴリ",
+    "startDate": "開始日時",
+    "endDate": "終了日時",
+    "allDay": "終日",
+    "notes": "メモ",
+    "notesPlaceholder": "メモを入力",
+    "reminder": "リマインダー",
+    "reminderMinutes": "分前に通知",
+    "save": "保存",
+    "delete": "削除",
+    "deleteConfirm": "この予定を削除しますか？",
+    "edit": "編集",
+    "create": "予定を作成"
+  },
+  "diary": {
+    "title": "タイトル",
+    "titlePlaceholder": "日記のタイトル",
+    "body": "本文",
+    "bodyPlaceholder": "今日はどんな一日でしたか？",
+    "mood": "気分",
+    "location": "場所",
+    "locationPlaceholder": "場所を入力",
+    "tags": "タグ",
+    "addPhoto": "写真を追加",
+    "save": "保存",
+    "create": "日記を作成"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "新規登録",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "displayName": "表示名",
+    "noAccount": "アカウントをお持ちでない方",
+    "hasAccount": "すでにアカウントをお持ちの方",
+    "createFamily": "家族を作成",
+    "joinFamily": "家族に参加",
+    "familyName": "家族の名前",
+    "inviteCode": "招待コード",
+    "generation": "世代",
+    "parent": "親世代",
+    "grandparent": "祖父母世代",
+    "child": "子世代",
+    "logout": "ログアウト"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "empty": "データがありません"
+  },
+  "emergency": {
+    "title": "緊急",
+    "contacts": "緊急連絡先",
+    "notSafe": "I AM NOT SAFE",
+    "addContact": "連絡先を追加"
+  },
+  "settings": {
+    "title": "設定",
+    "profile": "プロフィール",
+    "familyMembers": "家族メンバー",
+    "inviteCode": "招待コード",
+    "shareInvite": "招待コードを共有"
+  }
+}

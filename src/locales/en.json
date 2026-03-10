@@ -1,0 +1,94 @@
+{
+  "tabs": {
+    "home": "Home",
+    "notebook": "Notebook",
+    "calendar": "Calendar",
+    "emergency": "Emergency"
+  },
+  "categories": {
+    "health": "Health",
+    "family": "Family",
+    "errands": "Errands",
+    "social": "Social"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "todaySchedule": "Today's Schedule",
+    "noEvents": "No events",
+    "newEvent": "New Event",
+    "newDiary": "New Diary",
+    "allDay": "All Day"
+  },
+  "event": {
+    "title": "Title",
+    "titlePlaceholder": "Event title",
+    "category": "Category",
+    "startDate": "Start",
+    "endDate": "End",
+    "allDay": "All Day",
+    "notes": "Notes",
+    "notesPlaceholder": "Add notes",
+    "reminder": "Reminder",
+    "reminderMinutes": "minutes before",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this event?",
+    "edit": "Edit",
+    "create": "Create Event"
+  },
+  "diary": {
+    "title": "Title",
+    "titlePlaceholder": "Diary title",
+    "body": "Body",
+    "bodyPlaceholder": "How was your day?",
+    "mood": "Mood",
+    "location": "Location",
+    "locationPlaceholder": "Enter location",
+    "tags": "Tags",
+    "addPhoto": "Add Photo",
+    "save": "Save",
+    "create": "Create Diary Entry"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "Display Name",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createFamily": "Create Family",
+    "joinFamily": "Join Family",
+    "familyName": "Family Name",
+    "inviteCode": "Invite Code",
+    "generation": "Generation",
+    "parent": "Parent",
+    "grandparent": "Grandparent",
+    "child": "Child",
+    "logout": "Logout"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "empty": "No data"
+  },
+  "emergency": {
+    "title": "Emergency",
+    "contacts": "Emergency Contacts",
+    "notSafe": "I AM NOT SAFE",
+    "addContact": "Add Contact"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "familyMembers": "Family Members",
+    "inviteCode": "Invite Code",
+    "shareInvite": "Share Invite Code"
+  }
+}
