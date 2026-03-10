@@ -17,7 +17,9 @@
     "noEvents": "予定はありません",
     "newEvent": "予定を追加",
     "newDiary": "日記を書く",
-    "allDay": "終日"
+    "allDay": "終日",
+    "jumpToDate": "日付を指定",
+    "today": "今日"
   },
   "event": {
     "title": "タイトル",
@@ -28,13 +30,29 @@
     "allDay": "終日",
     "notes": "メモ",
     "notesPlaceholder": "メモを入力",
-    "reminder": "リマインダー",
-    "reminderMinutes": "分前に通知",
+    "reminder": "通知",
+    "reminder30min": "30分前",
+    "reminder1hour": "1時間前",
+    "reminder2hours": "2時間前",
+    "reminder1day": "1日前",
+    "reminderCustom": "カスタム",
+    "reminderMinutes": "分前",
+    "titleRequired": "タイトルを入力してください",
     "save": "保存",
     "delete": "削除",
     "deleteConfirm": "この予定を削除しますか？",
     "edit": "編集",
-    "create": "予定を作成"
+    "create": "予定を作成",
+    "color": "帯の色",
+    "recurrence": "繰り返し",
+    "recurrenceNone": "なし",
+    "recurrenceDaily": "毎日",
+    "recurrenceWeekly": "毎週",
+    "recurrenceMonthly": "毎月",
+    "recurrenceYearly": "毎年",
+    "assignee": "担当者",
+    "assigneeNone": "なし",
+    "done": "完了"
   },
   "diary": {
     "title": "タイトル",

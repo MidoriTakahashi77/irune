@@ -2,13 +2,12 @@ import { z } from "zod";
 
 export const eventSchema = z.object({
   title: z.string().min(1, "タイトルを入力してください"),
-  category: z.enum(["health", "family", "errands", "social"]),
+  category: z.enum(["health", "family", "errands", "social"]).optional(),
   start_at: z.string(),
   end_at: z.string(),
   all_day: z.boolean(),
   notes: z.string().optional(),
-  reminder: z.boolean(),
-  reminder_minutes: z.number().optional(),
+  reminders: z.array(z.number()).optional(),
 });
 
 export type EventFormData = z.infer<typeof eventSchema>;

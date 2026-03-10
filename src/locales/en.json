@@ -17,7 +17,9 @@
     "noEvents": "No events",
     "newEvent": "New Event",
     "newDiary": "New Diary",
-    "allDay": "All Day"
+    "allDay": "All Day",
+    "jumpToDate": "Go to date",
+    "today": "Today"
   },
   "event": {
     "title": "Title",
@@ -28,13 +30,29 @@
     "allDay": "All Day",
     "notes": "Notes",
     "notesPlaceholder": "Add notes",
-    "reminder": "Reminder",
-    "reminderMinutes": "minutes before",
+    "reminder": "Reminders",
+    "reminder30min": "30 min",
+    "reminder1hour": "1 hour",
+    "reminder2hours": "2 hours",
+    "reminder1day": "1 day",
+    "reminderCustom": "Custom",
+    "reminderMinutes": "min before",
+    "titleRequired": "Please enter a title",
     "save": "Save",
     "delete": "Delete",
     "deleteConfirm": "Delete this event?",
     "edit": "Edit",
-    "create": "Create Event"
+    "create": "Create Event",
+    "color": "Color",
+    "recurrence": "Repeat",
+    "recurrenceNone": "None",
+    "recurrenceDaily": "Daily",
+    "recurrenceWeekly": "Weekly",
+    "recurrenceMonthly": "Monthly",
+    "recurrenceYearly": "Yearly",
+    "assignee": "Assignee",
+    "assigneeNone": "None",
+    "done": "Done"
   },
   "diary": {
     "title": "Title",
