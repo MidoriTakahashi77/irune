@@ -1,0 +1,377 @@
+# ============================================================
+# E2E Test: カレンダー予定作成 - 全機能網羅テスト
+# ============================================================
+# Prerequisites:
+#   1. bun run scripts/e2e-setup.ts で E2E_DEEP_LINK を取得
+#   2. maestro test .maestro/calendar-create-event.yaml -e E2E_DEEP_LINK=...
+# ============================================================
+appId: com.irune.app
+appTimeout: 15000
+---
+
+# --------------------------------------------------
+# Setup: セッション注入してログイン状態にする
+# --------------------------------------------------
+- launchApp:
+    clearState: true
+- openLink: ${E2E_DEEP_LINK}
+
+# --------------------------------------------------
+# Test 1: カレンダー画面が表示されるのを待つ
+# --------------------------------------------------
+- assertVisible: "Sun"
+
+# --------------------------------------------------
+# Test 2: 基本的な予定作成（タイトルのみ）
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- assertVisible: "予定を追加"
+- tapOn: "予定を追加"
+
+# タイトル入力フィールドに自動フォーカスされているか確認
+- assertVisible: "予定のタイトル"
+- inputText: "基本テスト予定"
+- hideKeyboard
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+
+# カレンダーに戻り、イベントが表示されているか
+- assertVisible: "基本テスト予定"
+
+# --------------------------------------------------
+# Test 3: タイトル空白バリデーション
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- assertVisible: "予定を追加"
+- tapOn: "予定を追加"
+- assertVisible: "予定のタイトル"
+
+# タイトルを入力せずに保存を押す
+- hideKeyboard
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+
+# エラーメッセージが表示されるか
+- assertVisible: "タイトルを入力してください"
+
+# キャンセルで戻る
+- tapOn: "キャンセル"
+
+# --------------------------------------------------
+# Test 4: 終日予定の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- assertVisible: "予定を追加"
+- tapOn: "予定を追加"
+- inputText: "終日テスト予定"
+- hideKeyboard
+
+# 終日トグルをON
+- tapOn: "終日"
+
+# 開始日・終了日が両方表示されているか
+- assertVisible: "開始日時"
+- assertVisible: "終了日時"
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "終日テスト予定"
+
+# --------------------------------------------------
+# Test 5: 帯の色を変更した予定の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "赤色テスト予定"
+- hideKeyboard
+
+# 色選択セクションが見えるまでスクロール
+- scrollUntilVisible:
+    element: "帯の色"
+    direction: DOWN
+
+# 2番目の色（赤）をタップ
+- tapOn:
+    id: "color-D32F2F"
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "赤色テスト予定"
+
+# --------------------------------------------------
+# Test 6: 繰り返し予定（毎週）の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "毎週テスト予定"
+- hideKeyboard
+
+# 繰り返しセクションまでスクロール
+- scrollUntilVisible:
+    element: "繰り返し"
+    direction: DOWN
+- assertVisible: "なし"
+- assertVisible: "毎日"
+- assertVisible: "毎週"
+- assertVisible: "毎月"
+- assertVisible: "毎年"
+
+# 毎週を選択
+- tapOn: "毎週"
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "毎週テスト予定"
+
+# --------------------------------------------------
+# Test 7: 繰り返し予定（毎月）の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "毎月テスト予定"
+- hideKeyboard
+
+- scrollUntilVisible:
+    element: "繰り返し"
+    direction: DOWN
+- tapOn: "毎月"
+
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "毎月テスト予定"
+
+# --------------------------------------------------
+# Test 8: 繰り返し予定（毎年 - 誕生日）の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "誕生日テスト"
+- hideKeyboard
+
+- scrollUntilVisible:
+    element: "繰り返し"
+    direction: DOWN
+- tapOn: "毎年"
+- tapOn: "終日"
+
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "誕生日テスト"
+
+# --------------------------------------------------
+# Test 9: 通知（リマインダー）付き予定の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "通知テスト予定"
+- hideKeyboard
+
+# 通知セクションまでスクロール
+- scrollUntilVisible:
+    element: "通知"
+    direction: DOWN
+
+# 30分前を選択
+- tapOn: "30分前"
+
+# 1時間前も追加で選択（複数リマインダー）
+- tapOn: "1時間前"
+
+# 1日前も選択
+- tapOn: "1日前"
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "通知テスト予定"
+
+# --------------------------------------------------
+# Test 10: カスタム通知時間の追加
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "カスタム通知テスト"
+- hideKeyboard
+
+- scrollUntilVisible:
+    element: "通知"
+    direction: DOWN
+
+# カスタムをタップ
+- tapOn: "カスタム"
+
+# カスタム分数を入力
+- inputText: "45"
+- hideKeyboard
+- tapOn:
+    text: "保存"
+    index: 0
+
+# メイン保存
+- scrollUntilVisible:
+    element:
+      text: "保存"
+      index: -1
+    direction: DOWN
+- tapOn:
+    text: "保存"
+    index: -1
+- assertVisible: "カスタム通知テスト"
+
+# --------------------------------------------------
+# Test 11: 担当者を選択した予定の作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "担当者テスト予定"
+- hideKeyboard
+
+# 担当者セクションまでスクロール
+- scrollUntilVisible:
+    element: "担当者"
+    direction: DOWN
+
+# テスト太郎（自分）を選択
+- tapOn: "テスト太郎"
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "担当者テスト予定"
+
+# --------------------------------------------------
+# Test 12: 全機能を組み合わせた予定作成
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+- tapOn: "予定を追加"
+- inputText: "フル機能テスト予定"
+- hideKeyboard
+
+# 終日ON
+- tapOn: "終日"
+
+# 色変更（3番目の色: ピンク）
+- scrollUntilVisible:
+    element: "帯の色"
+    direction: DOWN
+
+# 繰り返し: 毎月
+- scrollUntilVisible:
+    element: "繰り返し"
+    direction: DOWN
+- tapOn: "毎月"
+
+# 担当者
+- scrollUntilVisible:
+    element: "担当者"
+    direction: DOWN
+- tapOn: "テスト太郎"
+
+# 通知: 30分前 + 1日前
+- scrollUntilVisible:
+    element: "通知"
+    direction: DOWN
+- tapOn: "30分前"
+- tapOn: "1日前"
+
+# メモ
+- scrollUntilVisible:
+    element: "メモ"
+    direction: DOWN
+- tapOn: "メモを入力"
+- inputText: "これはE2Eテスト用の全機能テスト予定です"
+- hideKeyboard
+
+# 保存
+- scrollUntilVisible:
+    element: "保存"
+    direction: DOWN
+- tapOn: "保存"
+- assertVisible: "フル機能テスト予定"
+
+# --------------------------------------------------
+# Test 13: 「今日」ボタンのナビゲーション
+# --------------------------------------------------
+# 下にスクロールして別の月に移動
+- swipe:
+    direction: UP
+    duration: 2000
+- swipe:
+    direction: UP
+    duration: 2000
+
+# 「今日」ボタンが表示されるか
+- assertVisible: "今日"
+
+# 今日ボタンで戻る
+- tapOn: "今日"
+
+# --------------------------------------------------
+# Test 14: 日付指定ジャンプ
+# --------------------------------------------------
+- tapOn:
+    id: "calendar-number-outline"
+
+- assertVisible: "日付を指定"
+
+# OKで閉じる
+- tapOn: "OK"
+
+# --------------------------------------------------
+# Test 15: ボトムシートからイベント詳細への遷移
+# --------------------------------------------------
+- tapOn:
+    text: "day-10"
+    retryTapIfNoChange: true
+
+# ボトムシートのイベントカードをタップ
+- assertVisible: "基本テスト予定|終日テスト予定|赤色テスト予定"
+- tapOn: "基本テスト予定"
+
+# イベント詳細画面が開くか
+- assertVisible: "基本テスト予定"
