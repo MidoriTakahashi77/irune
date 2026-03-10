@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchEvents,
@@ -6,6 +7,7 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/services/events";
+import { expandRecurringEvents } from "@/utils/recurrence";
 import type { EventInsert, EventUpdate } from "@/types/events";
 
 export function useEvents(
@@ -13,11 +15,22 @@ export function useEvents(
   start: string,
   end: string
 ) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["events", familyId, start, end],
     queryFn: () => fetchEvents(familyId!, start, end),
     enabled: !!familyId,
   });
+
+  const data = useMemo(() => {
+    if (!query.data) return [];
+    const { regular, recurring } = query.data;
+    const expanded = expandRecurringEvents(recurring, start, end);
+    return [...regular, ...expanded].sort(
+      (a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime()
+    );
+  }, [query.data, start, end]);
+
+  return { ...query, data };
 }
 
 export function useEvent(id: string | undefined) {

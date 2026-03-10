@@ -2,16 +2,30 @@ import { supabase } from "@/lib/supabase";
 import type { EventInsert, EventUpdate } from "@/types/events";
 
 export async function fetchEvents(familyId: string, start: string, end: string) {
-  const { data, error } = await supabase
+  // Fetch non-recurring events in the date range
+  const { data: regular, error: err1 } = await supabase
     .from("events")
     .select("*, profiles:created_by(display_name, color)")
     .eq("family_id", familyId)
+    .is("recurrence", null)
     .gte("start_at", start)
     .lte("start_at", end)
     .order("start_at", { ascending: true });
 
-  if (error) throw error;
-  return data;
+  if (err1) throw err1;
+
+  // Fetch all recurring events (original start_at <= end of visible range)
+  const { data: recurring, error: err2 } = await supabase
+    .from("events")
+    .select("*, profiles:created_by(display_name, color)")
+    .eq("family_id", familyId)
+    .not("recurrence", "is", null)
+    .lte("start_at", end)
+    .order("start_at", { ascending: true });
+
+  if (err2) throw err2;
+
+  return { regular: regular ?? [], recurring: recurring ?? [] };
 }
 
 export async function fetchEvent(id: string) {
