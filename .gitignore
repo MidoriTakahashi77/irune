@@ -48,3 +48,4 @@ app-example
 .tool-versions
 
 test-results/
+supabase/.temp/
