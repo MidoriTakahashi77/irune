@@ -175,6 +175,7 @@ export interface Database {
           body: Json | null;
           is_locked: boolean;
           shared_with: string[] | null;
+          subject_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -186,6 +187,7 @@ export interface Database {
           body?: Json | null;
           is_locked?: boolean;
           shared_with?: string[] | null;
+          subject_id?: string | null;
         };
         Update: {
           id?: string;
@@ -196,6 +198,7 @@ export interface Database {
           body?: Json | null;
           is_locked?: boolean;
           shared_with?: string[] | null;
+          subject_id?: string | null;
         };
       };
       emergency_contacts: {
@@ -206,6 +209,10 @@ export interface Database {
           relationship: string;
           phone: string;
           is_priority: boolean;
+          category: string;
+          email: string | null;
+          address: string | null;
+          notes: string | null;
         };
         Insert: {
           id?: string;
@@ -214,6 +221,10 @@ export interface Database {
           relationship: string;
           phone: string;
           is_priority?: boolean;
+          category?: string;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
         };
         Update: {
           id?: string;
@@ -222,6 +233,52 @@ export interface Database {
           relationship?: string;
           phone?: string;
           is_priority?: boolean;
+          category?: string;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+        };
+      };
+      member_details: {
+        Row: {
+          id: string;
+          profile_id: string;
+          full_name: string | null;
+          full_name_kana: string | null;
+          birth_date: string | null;
+          gender: string | null;
+          blood_type: string | null;
+          phone: string | null;
+          email: string | null;
+          address: string | null;
+          notes: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          full_name?: string | null;
+          full_name_kana?: string | null;
+          birth_date?: string | null;
+          gender?: string | null;
+          blood_type?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          full_name?: string | null;
+          full_name_kana?: string | null;
+          birth_date?: string | null;
+          gender?: string | null;
+          blood_type?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
         };
       };
     };

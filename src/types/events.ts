@@ -15,7 +15,48 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type FamilyRow = Database["public"]["Tables"]["families"]["Row"];
 
 export type EventCategory = "health" | "family" | "errands" | "social";
-export type NoteType = "free" | "my_letter" | "evacuation" | "house";
+export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
+export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
+export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
+
+export type MemberDetailRow =
+  Database["public"]["Tables"]["member_details"]["Row"];
+export type MemberDetailInsert =
+  Database["public"]["Tables"]["member_details"]["Insert"];
+export type MemberDetailUpdate =
+  Database["public"]["Tables"]["member_details"]["Update"];
+
+export type EmergencyContactRow =
+  Database["public"]["Tables"]["emergency_contacts"]["Row"];
+export type EmergencyContactInsert =
+  Database["public"]["Tables"]["emergency_contacts"]["Insert"];
+export type EmergencyContactUpdate =
+  Database["public"]["Tables"]["emergency_contacts"]["Update"];
+
+export type NoteType =
+  | "free"
+  | "my_letter"
+  | "evacuation"
+  | "house"
+  | "life_profile"
+  | "life_medical"
+  | "life_care"
+  | "life_funeral"
+  | "life_burial"
+  | "life_assets"
+  | "life_contracts"
+  | "life_digital"
+  | "life_pension"
+  | "life_pet"
+  | "life_will"
+  | "life_keepsake"
+  | "life_message"
+  | "life_history";
+
+export type EmergencyContactCategory =
+  | "emergency"
+  | "death_notification"
+  | "professional";
 export type Relationship =
   | "spouse"
   | "father"
