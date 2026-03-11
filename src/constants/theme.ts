@@ -67,6 +67,6 @@ export const FontSize = {
   tabIcon: 28,
 } as const;
 
-export const TAB_BAR_HEIGHT = 64;
+export const TAB_BAR_HEIGHT = 80;
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

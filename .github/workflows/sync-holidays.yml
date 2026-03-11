@@ -1,0 +1,48 @@
+name: Sync Japanese Holidays
+
+on:
+  schedule:
+    # 毎月1日 9:00 JST (0:00 UTC) に実行
+    - cron: "0 0 1 * *"
+  workflow_dispatch: # 手動実行も可能
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Fetch holidays and update
+        run: bun run scripts/sync-holidays.ts
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet src/constants/holidays.ts; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: update Japanese holidays from Cabinet Office data"
+          title: "chore: 祝日データ更新"
+          body: |
+            内閣府の祝日CSVに基づき、`src/constants/holidays.ts` の固定祝日データを更新しました。
+
+            - Source: https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv
+            - 自動生成PR
+          branch: chore/sync-holidays
+          delete-branch: true
+          labels: automated

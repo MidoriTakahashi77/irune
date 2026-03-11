@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,19 +8,20 @@ import {
   TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useCreateEvent } from "@/hooks/useEvents";
+import { useEvent, useUpdateEvent, useDeleteEvent } from "@/hooks/useEvents";
 import { useFamily } from "@/hooks/useFamily";
-import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
@@ -38,38 +39,26 @@ const RECURRENCE_OPTIONS: { value: RecurrenceType; labelKey: string }[] = [
   { value: "yearly", labelKey: "event.recurrenceYearly" },
 ];
 
-export default function NewEventScreen() {
+export default function EditEventScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
-  const { selectedDate } = useCalendarStore();
-  const createEvent = useCreateEvent();
+  const { data: event, isLoading } = useEvent(id);
+  const updateEvent = useUpdateEvent();
+  const deleteEvent = useDeleteEvent();
   const { data: members = [] } = useFamily(profile?.family_id);
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const defaultStartHour = String(currentHour).padStart(2, "0");
-  const defaultEndHour = String(Math.min(currentHour + 1, 23)).padStart(
-    2,
-    "0"
-  );
 
   const [title, setTitle] = useState("");
   const [allDay, setAllDay] = useState(false);
-
-  const initialStart = new Date(`${selectedDate}T${defaultStartHour}:00:00`);
-  const initialEnd = new Date(`${selectedDate}T${defaultEndHour}:00:00`);
-  const [startDate, setStartDate] = useState(initialStart);
-  const [endDate, setEndDate] = useState(initialEnd);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [startPickerMode, setStartPickerMode] = useState<"date" | "time">(
-    "date"
-  );
+  const [startPickerMode, setStartPickerMode] = useState<"date" | "time">("date");
   const [endPickerMode, setEndPickerMode] = useState<"date" | "time">("date");
-
   const [notes, setNotes] = useState("");
   const [reminders, setReminders] = useState<number[]>([]);
   const [showCustomReminder, setShowCustomReminder] = useState(false);
@@ -78,6 +67,23 @@ export default function NewEventScreen() {
   const [recurrence, setRecurrence] = useState<RecurrenceType>(null);
   const [assignedTo, setAssignedTo] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [initialized, setInitialized] = useState(false);
+
+  // Populate form with existing event data
+  useEffect(() => {
+    if (event && !initialized) {
+      setTitle(event.title ?? "");
+      setAllDay(event.all_day ?? false);
+      setStartDate(new Date(event.start_at));
+      setEndDate(new Date(event.end_at));
+      setNotes(event.notes ?? "");
+      setReminders(event.reminders ?? []);
+      setEventColor(event.color ?? EVENT_COLORS[0]);
+      setRecurrence(event.recurrence ?? null);
+      setAssignedTo(event.assigned_to ?? []);
+      setInitialized(true);
+    }
+  }, [event, initialized]);
 
   function formatDateOnly(d: Date): string {
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
@@ -113,26 +119,43 @@ export default function NewEventScreen() {
     );
   }
 
+  function handleDelete() {
+    Alert.alert(t("event.delete"), t("event.deleteConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: async () => {
+          if (id) {
+            await deleteEvent.mutateAsync(id);
+            router.back();
+          }
+        },
+      },
+    ]);
+  }
+
   async function handleSubmit() {
     if (!title.trim()) {
       setError(t("event.titleRequired"));
       return;
     }
-    if (!profile?.family_id) return;
+    if (!id) return;
     setError("");
 
-    await createEvent.mutateAsync({
-      title: title.trim(),
-      family_id: profile.family_id,
-      created_by: profile.id,
-      start_at: startDate.toISOString(),
-      end_at: endDate.toISOString(),
-      all_day: allDay,
-      notes: notes.trim() || null,
-      reminders,
-      color: eventColor,
-      recurrence,
-      assigned_to: assignedTo,
+    await updateEvent.mutateAsync({
+      id,
+      updates: {
+        title: title.trim(),
+        start_at: startDate.toISOString(),
+        end_at: endDate.toISOString(),
+        all_day: allDay,
+        notes: notes.trim() || null,
+        reminders,
+        color: eventColor,
+        recurrence,
+        assigned_to: assignedTo,
+      },
     });
     router.back();
   }
@@ -238,6 +261,32 @@ export default function NewEventScreen() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[styles.safe, { backgroundColor: colors.background }]}
+      >
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={styles.loader}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (!event) {
+    return (
+      <SafeAreaView
+        style={[styles.safe, { backgroundColor: colors.background }]}
+      >
+        <Text style={[styles.errorText, { color: colors.error }]}>
+          {t("common.error")}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.safe, { backgroundColor: colors.background }]}
@@ -256,14 +305,18 @@ export default function NewEventScreen() {
               onPress={() => router.back()}
               variant="ghost"
             />
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-              {t("event.create")}
-            </Text>
-            <View style={{ width: 80 }} />
+            <TouchableOpacity
+              style={styles.headerDeleteButton}
+              onPress={handleDelete}
+              disabled={deleteEvent.isPending}
+              accessibilityLabel={t("event.delete")}
+            >
+              <Ionicons name="trash-outline" size={22} color={colors.error} />
+            </TouchableOpacity>
           </View>
 
           {error ? (
-            <Text style={[styles.error, { color: colors.error }]}>
+            <Text style={[styles.errorMsg, { color: colors.error }]}>
               {error}
             </Text>
           ) : null}
@@ -276,7 +329,6 @@ export default function NewEventScreen() {
               setTitle(text.trimStart());
               if (error) setError("");
             }}
-            autoFocus
           />
 
           {/* Color picker */}
@@ -519,8 +571,9 @@ export default function NewEventScreen() {
           <Button
             title={t("event.save")}
             onPress={handleSubmit}
-            loading={createEvent.isPending}
+            loading={updateEvent.isPending}
           />
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -540,14 +593,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing.lg,
   },
-  headerTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: "bold",
-  },
-  error: {
+  errorMsg: {
     textAlign: "center",
     marginBottom: Spacing.md,
     fontSize: FontSize.sm,
+  },
+  errorText: {
+    textAlign: "center",
+    marginTop: Spacing.xl,
+    fontSize: FontSize.md,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
   },
   label: {
     fontSize: FontSize.sm,
@@ -643,5 +701,11 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: Spacing.sm,
     marginTop: Spacing.sm,
+  },
+  headerDeleteButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

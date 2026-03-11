@@ -72,8 +72,10 @@ export interface Database {
           end_at: string;
           all_day: boolean;
           notes: string | null;
-          reminder: boolean;
-          reminder_minutes: number | null;
+          reminders: number[];
+          color: string;
+          recurrence: string | null;
+          assigned_to: string[];
           created_at: string;
         };
         Insert: {
@@ -86,8 +88,10 @@ export interface Database {
           end_at: string;
           all_day?: boolean;
           notes?: string | null;
-          reminder?: boolean;
-          reminder_minutes?: number | null;
+          reminders?: number[];
+          color?: string;
+          recurrence?: string | null;
+          assigned_to?: string[];
         };
         Update: {
           id?: string;
@@ -99,8 +103,10 @@ export interface Database {
           end_at?: string;
           all_day?: boolean;
           notes?: string | null;
-          reminder?: boolean;
-          reminder_minutes?: number | null;
+          reminders?: number[];
+          color?: string;
+          recurrence?: string | null;
+          assigned_to?: string[];
         };
       };
       diary_entries: {

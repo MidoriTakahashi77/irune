@@ -4,7 +4,10 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 2,
+      gcTime: 1000 * 60 * 30,   // 30 minutes
+      retry: 1,
+      retryDelay: 1000,
+      refetchOnWindowFocus: false, // バッテリー節約: バックグラウンド復帰時のrefetch無効
     },
   },
 });

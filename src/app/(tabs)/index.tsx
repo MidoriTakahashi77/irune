@@ -29,7 +29,7 @@ export default function HomeScreen() {
   );
 
   function handleEventPress(event: EventRow) {
-    router.push(`/(tabs)/calendar/event/${event.id}`);
+    router.push(`/(tabs)/calendar/edit-event/${event.id}`);
   }
 
   return (

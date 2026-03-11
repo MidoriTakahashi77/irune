@@ -1,23 +1,21 @@
+import { memo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
-import { CATEGORY_CONFIG } from "@/constants/categories";
 import { formatTime } from "@/utils/date";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useTranslation } from "react-i18next";
-import type { EventRow, EventCategory } from "@/types/events";
+import type { EventRow } from "@/types/events";
 
 interface ScheduleCardProps {
   event: EventRow;
   onPress: (event: EventRow) => void;
 }
 
-export function ScheduleCard({ event, onPress }: ScheduleCardProps) {
+export const ScheduleCard = memo(function ScheduleCard({ event, onPress }: ScheduleCardProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
-  const category = event.category as EventCategory;
-  const config = CATEGORY_CONFIG[category];
 
   return (
     <TouchableOpacity
@@ -25,7 +23,7 @@ export function ScheduleCard({ event, onPress }: ScheduleCardProps) {
       onPress={() => onPress(event)}
       activeOpacity={0.7}
     >
-      <View style={[styles.indicator, { backgroundColor: config?.color }]} />
+      <View style={[styles.indicator, { backgroundColor: colors.primary }]} />
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
           {event.title}
@@ -50,7 +48,7 @@ export function ScheduleCard({ event, onPress }: ScheduleCardProps) {
       />
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
