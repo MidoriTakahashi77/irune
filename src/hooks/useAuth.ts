@@ -60,20 +60,6 @@ export function useAuth() {
       setPendingFamilyId(parsed.queryParams.family_id as string);
     }
 
-    // E2E test auth injection: irune://e2e-auth?access_token=...&refresh_token=...
-    if (url.includes("e2e-auth") && url.includes("access_token")) {
-      const params = new URLSearchParams(url.split("?")[1]);
-      const accessToken = params.get("access_token");
-      const refreshToken = params.get("refresh_token");
-      if (accessToken && refreshToken) {
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        return;
-      }
-    }
-
     // Extract tokens from magic link hash fragment
     if (url.includes("access_token") && url.includes("refresh_token")) {
       const params = new URLSearchParams(
