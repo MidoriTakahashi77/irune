@@ -7,12 +7,15 @@ export interface FieldDefinition {
   key: string;
   labelKey: string;
   type: FieldType;
+  placeholderKey?: string;
   options?: string[];
+  /** Sub-fields for repeatable type */
   fields?: FieldDefinition[];
 }
 
 export interface SectionDefinition {
   titleKey: string;
+  descriptionKey?: string;
   fields: FieldDefinition[];
 }
 
