@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,9 @@ import {
   Animated,
   Dimensions,
   PanResponder,
+  Alert,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
@@ -18,7 +20,6 @@ import { formatDate, formatTime } from "@/utils/date";
 import type { EventRow } from "@/types/events";
 
 const SHEET_HEIGHT = 320;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 interface DayDetailSheetProps {
   visible: boolean;
@@ -27,6 +28,67 @@ interface DayDetailSheetProps {
   onClose: () => void;
   onEventPress: (event: EventRow) => void;
   onAddEvent: () => void;
+  onDeleteEvent: (id: string) => void;
+}
+
+function SwipeableEventCard({
+  event,
+  onPress,
+  onDelete,
+  colors,
+  scheme,
+  t,
+}: {
+  event: EventRow;
+  onPress: () => void;
+  onDelete: () => void;
+  colors: (typeof Colors)["light"] | (typeof Colors)["dark"];
+  scheme: "light" | "dark";
+  t: (key: string) => string;
+}) {
+  const swipeableRef = useRef<Swipeable>(null);
+
+  const renderRightActions = useCallback(
+    () => (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onDelete();
+        }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+        <Text style={styles.deleteActionText}>{t("common.delete")}</Text>
+      </TouchableOpacity>
+    ),
+    [onDelete, t]
+  );
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      rightThreshold={60}
+    >
+      <TouchableOpacity
+        style={[
+          styles.eventCard,
+          { backgroundColor: (event as any).color || colors.primary },
+        ]}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.eventTitle}>{event.title}</Text>
+        <Text style={styles.eventTime}>
+          {event.all_day
+            ? t("calendar.allDay")
+            : `${formatTime(event.start_at)}〜${formatTime(event.end_at)}`}
+        </Text>
+      </TouchableOpacity>
+    </Swipeable>
+  );
 }
 
 export function DayDetailSheet({
@@ -36,6 +98,7 @@ export function DayDetailSheet({
   onClose,
   onEventPress,
   onAddEvent,
+  onDeleteEvent,
 }: DayDetailSheetProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -112,6 +175,17 @@ export function DayDetailSheet({
     }
   }, [visible]);
 
+  function handleDelete(eventId: string) {
+    Alert.alert(t("event.delete"), t("event.deleteConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: () => onDeleteEvent(eventId),
+      },
+    ]);
+  }
+
   const dateLabel = formatDate(date, "yyyy年M月d日");
 
   if (!visible && !isVisible.current) return null;
@@ -169,22 +243,15 @@ export function DayDetailSheet({
             </Text>
           ) : (
             events.map((event) => (
-              <TouchableOpacity
+              <SwipeableEventCard
                 key={event.id}
-                style={[
-                  styles.eventCard,
-                  { backgroundColor: (event as any).color || colors.primary },
-                ]}
+                event={event}
                 onPress={() => onEventPress(event)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <Text style={styles.eventTime}>
-                  {event.all_day
-                    ? t("calendar.allDay")
-                    : `${formatTime(event.start_at)}〜${formatTime(event.end_at)}`}
-                </Text>
-              </TouchableOpacity>
+                onDelete={() => handleDelete(event.id)}
+                colors={colors}
+                scheme={scheme}
+                t={t}
+              />
             ))
           )}
         </ScrollView>
@@ -278,6 +345,21 @@ const styles = StyleSheet.create({
   eventTime: {
     color: "rgba(255,255,255,0.85)",
     fontSize: FontSize.sm,
+    marginTop: 2,
+  },
+  deleteAction: {
+    backgroundColor: "#D32F2F",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 80,
+    borderRadius: 12,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.sm,
+  },
+  deleteActionText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "600",
     marginTop: 2,
   },
   actions: {

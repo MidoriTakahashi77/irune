@@ -7,6 +7,7 @@ export default function CalendarLayout() {
       <Stack.Screen name="new-event" options={{ presentation: "modal" }} />
       <Stack.Screen name="new-diary" options={{ presentation: "modal" }} />
       <Stack.Screen name="event/[id]" />
+      <Stack.Screen name="edit-event/[id]" options={{ presentation: "modal" }} />
       <Stack.Screen name="diary/[id]" />
     </Stack>
   );

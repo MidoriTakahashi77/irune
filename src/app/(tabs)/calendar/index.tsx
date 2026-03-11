@@ -17,7 +17,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
-import { useEvents } from "@/hooks/useEvents";
+import { useEvents, useDeleteEvent } from "@/hooks/useEvents";
 import { useCalendarStore } from "@/hooks/useCalendarStore";
 import { MonthlyCalendar } from "@/components/calendar/MonthlyCalendar";
 import { DayDetailSheet } from "@/components/calendar/DayDetailSheet";
@@ -40,6 +40,7 @@ export default function CalendarScreen() {
 
   const { start, end } = getMonthRange(currentMonth);
   const { data: events = [] } = useEvents(profile?.family_id, start, end);
+  const deleteEvent = useDeleteEvent();
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -61,7 +62,11 @@ export default function CalendarScreen() {
 
   function handleEventPress(event: EventRow) {
     setSheetVisible(false);
-    router.push(`/(tabs)/calendar/event/${getOriginalEventId(event.id)}`);
+    router.push(`/(tabs)/calendar/edit-event/${getOriginalEventId(event.id)}`);
+  }
+
+  function handleDeleteEvent(id: string) {
+    deleteEvent.mutate(getOriginalEventId(id));
   }
 
   function handleAddEvent() {
@@ -202,6 +207,7 @@ export default function CalendarScreen() {
         onClose={() => setSheetVisible(false)}
         onEventPress={handleEventPress}
         onAddEvent={handleAddEvent}
+        onDeleteEvent={handleDeleteEvent}
       />
     </View>
   );
