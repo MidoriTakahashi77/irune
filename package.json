@@ -8,6 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
     "e2e:web": "playwright test",
     "e2e:web:ui": "playwright test --ui"
   },
@@ -49,6 +50,8 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/react": "~19.1.10",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "^55.0.0",
     "iconv-lite": "^0.7.2",
     "typescript": "~5.9.2"
   },

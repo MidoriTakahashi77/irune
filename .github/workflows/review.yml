@@ -1,0 +1,56 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  review:
+    name: AI Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            PRの差分をレビューしてください。日本語でレビューしてください。
+            問題がない箇所にはコメントしないでください。
+
+            ## 観点
+
+            ### 正確性
+            - バグ、ロジックミス、off-by-one、null/undefined の未処理
+            - 状態管理の不整合（Zustand, TanStack Query のキャッシュ）
+            - 非同期処理の競合やエラーハンドリングの欠落
+
+            ### セキュリティ
+            - Supabase RLS を迂回しうるクエリ
+            - シークレットやAPIキーのハードコード
+            - ユーザー入力の未サニタイズ（XSS、インジェクション）
+            - 認証・認可チェックの漏れ
+
+            ### パフォーマンス
+            - 不要な再レンダリング（memo/useMemo/useCallback の欠落・誤用）
+            - FlatList の最適化漏れ（keyExtractor, getItemLayout）
+            - 大量データの非効率なフィルタリングやループ
+            - バンドルサイズへの影響が大きい変更
+
+            ### 設計・保守性
+            - 不要な複雑さ、過度な抽象化
+            - 既存のユーティリティやコンポーネントと重複する実装
+            - 削除・変更しづらい密結合
