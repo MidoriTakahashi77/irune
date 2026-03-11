@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -17,20 +10,19 @@ import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-export default function NewNoteScreen() {
+export default function NewNotebookScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
 
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [name, setName] = useState("");
 
   const upsertNote = useUpsertNote();
 
-  async function handleSave() {
-    if (!title.trim()) {
+  async function handleCreate() {
+    if (!name.trim()) {
       Alert.alert(t("notebook.titleRequired"));
       return;
     }
@@ -40,8 +32,8 @@ export default function NewNoteScreen() {
       family_id: profile.family_id,
       created_by: profile.id,
       note_type: "free",
-      title: title.trim(),
-      body: { content: body },
+      title: name.trim(),
+      body: null,
     });
 
     router.back();
@@ -58,45 +50,24 @@ export default function NewNoteScreen() {
           variant="ghost"
         />
         <Text style={[styles.topBarTitle, { color: colors.text }]}>
-          {t("notebook.newFreeNote")}
+          {t("notebook.newNotebook")}
         </Text>
         <Button
           title={t("common.save")}
-          onPress={handleSave}
+          onPress={handleCreate}
           loading={upsertNote.isPending}
         />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
+      <View style={styles.content}>
         <Input
-          label={t("notebook.noteTitle")}
-          value={title}
-          onChangeText={setTitle}
-          placeholder={t("notebook.noteTitlePlaceholder")}
+          label={t("notebook.notebookName")}
+          value={name}
+          onChangeText={setName}
+          placeholder={t("notebook.notebookNamePlaceholder")}
+          autoFocus
         />
-
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
-          {t("notebook.noteBody")}
-        </Text>
-        <TextInput
-          value={body}
-          onChangeText={setBody}
-          multiline
-          placeholder={t("notebook.noteBodyPlaceholder")}
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.textArea,
-            {
-              backgroundColor: colors.backgroundElement,
-              color: colors.text,
-              borderColor: colors.border,
-            },
-          ]}
-        />
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -118,18 +89,5 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.md,
-  },
-  label: {
-    fontSize: FontSize.sm,
-    fontWeight: "500",
-  },
-  textArea: {
-    fontSize: FontSize.md,
-    paddingVertical: 14,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    minHeight: 200,
-    textAlignVertical: "top",
   },
 });

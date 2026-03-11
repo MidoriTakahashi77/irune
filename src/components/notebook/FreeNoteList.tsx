@@ -3,10 +3,18 @@ import { useTranslation } from "react-i18next";
 import { NoteCard } from "./NoteCard";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { NoteRow } from "@/types/events";
+
+interface NoteWithPageCount {
+  id: string;
+  note_type: string;
+  title: string;
+  created_at: string;
+  is_locked: boolean;
+  notebook_pages?: { count: number }[];
+}
 
 interface FreeNoteListProps {
-  notes: NoteRow[];
+  notes: NoteWithPageCount[];
   onPress: (id: string) => void;
 }
 
@@ -31,16 +39,20 @@ export function FreeNoteList({ notes, onPress }: FreeNoteListProps) {
 
   return (
     <View style={styles.container}>
-      {freeNotes.map((note) => (
-        <NoteCard
-          key={note.id}
-          title={note.title}
-          noteType={note.note_type}
-          createdAt={note.created_at}
-          isLocked={note.is_locked}
-          onPress={() => onPress(note.id)}
-        />
-      ))}
+      {freeNotes.map((note) => {
+        const pageCount = note.notebook_pages?.[0]?.count;
+        return (
+          <NoteCard
+            key={note.id}
+            title={note.title}
+            noteType={note.note_type}
+            createdAt={note.created_at}
+            isLocked={note.is_locked}
+            pageCount={pageCount}
+            onPress={() => onPress(note.id)}
+          />
+        );
+      })}
     </View>
   );
 }

@@ -33,6 +33,13 @@ export type EmergencyContactInsert =
 export type EmergencyContactUpdate =
   Database["public"]["Tables"]["emergency_contacts"]["Update"];
 
+export type NotebookPageRow =
+  Database["public"]["Tables"]["notebook_pages"]["Row"];
+export type NotebookPageInsert =
+  Database["public"]["Tables"]["notebook_pages"]["Insert"];
+export type NotebookPageUpdate =
+  Database["public"]["Tables"]["notebook_pages"]["Update"];
+
 export type NoteType =
   | "free"
   | "my_letter"

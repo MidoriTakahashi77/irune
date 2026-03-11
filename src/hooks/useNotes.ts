@@ -1,6 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchNotes, fetchNote, upsertNote, deleteNote } from "@/services/notes";
-import type { NoteInsert } from "@/types/events";
+import {
+  fetchNotes,
+  fetchNote,
+  upsertNote,
+  deleteNote,
+  fetchNotebookPages,
+  createNotebookPage,
+  updateNotebookPage,
+  deleteNotebookPage,
+} from "@/services/notes";
+import type { NoteInsert, NotebookPageInsert, NotebookPageUpdate } from "@/types/events";
+
+// ── Notes ──
 
 export function useNotes(familyId: string | null | undefined) {
   return useQuery({
@@ -38,6 +49,51 @@ export function useDeleteNote() {
   return useMutation({
     mutationFn: (id: string) => deleteNote(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+// ── Notebook Pages ──
+
+export function useNotebookPages(noteId: string | undefined) {
+  return useQuery({
+    queryKey: ["notebook_pages", noteId],
+    queryFn: () => fetchNotebookPages(noteId!),
+    enabled: !!noteId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+}
+
+export function useCreateNotebookPage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (page: NotebookPageInsert) => createNotebookPage(page),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["notebook_pages", variables.note_id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
+export function useUpdateNotebookPage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...updates }: NotebookPageUpdate & { id: string }) =>
+      updateNotebookPage(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notebook_pages"] });
+    },
+  });
+}
+
+export function useDeleteNotebookPage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteNotebookPage(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notebook_pages"] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
   });

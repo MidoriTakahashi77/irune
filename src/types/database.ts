@@ -239,6 +239,35 @@ export interface Database {
           notes?: string | null;
         };
       };
+      notebook_pages: {
+        Row: {
+          id: string;
+          note_id: string;
+          title: string;
+          content: string;
+          position: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          note_id: string;
+          title?: string;
+          content?: string;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          note_id?: string;
+          title?: string;
+          content?: string;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       member_details: {
         Row: {
           id: string;
