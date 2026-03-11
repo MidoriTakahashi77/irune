@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
@@ -11,7 +12,7 @@ interface ScheduleCardProps {
   onPress: (event: EventRow) => void;
 }
 
-export function ScheduleCard({ event, onPress }: ScheduleCardProps) {
+export const ScheduleCard = memo(function ScheduleCard({ event, onPress }: ScheduleCardProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
@@ -47,7 +48,7 @@ export function ScheduleCard({ event, onPress }: ScheduleCardProps) {
       />
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

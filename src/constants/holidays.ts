@@ -136,11 +136,23 @@ export function getHolidaysForYear(year: number): Holiday[] {
   );
 }
 
-/** 指定年の祝日を日付→名前のMapで返す */
+/** モジュールレベルキャッシュ */
+const holidayMapCache = new Map<number, Map<string, string>>();
+
+/** 指定年の祝日を日付→名前のMapで返す（キャッシュ付き） */
 export function getHolidayMap(year: number): Map<string, string> {
+  const cached = holidayMapCache.get(year);
+  if (cached) return cached;
   const map = new Map<string, string>();
   for (const h of getHolidaysForYear(year)) {
     map.set(h.date, h.name);
   }
+  holidayMapCache.set(year, map);
   return map;
+}
+
+/** 日付文字列から祝日名を取得（キャッシュ付き） */
+export function getHolidayName(dateStr: string): string | undefined {
+  const year = parseInt(dateStr.substring(0, 4));
+  return getHolidayMap(year).get(dateStr);
 }

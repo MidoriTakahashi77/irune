@@ -1,14 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   Text,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import DateTimePicker, {
-  type DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
+import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+
+const DateTimePicker = lazy(
+  () => import("@react-native-community/datetimepicker")
+);
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,7 +43,6 @@ export default function CalendarScreen() {
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [calendarKey, setCalendarKey] = useState(0);
 
   const now = new Date();
   const isCurrentMonth =
@@ -71,14 +73,12 @@ export default function CalendarScreen() {
     const today = toDateString(new Date());
     setSelectedDate(today);
     setCurrentMonth(new Date());
-    setCalendarKey((k) => k + 1);
   }
 
   function jumpToDate(date: Date) {
     const dateStr = toDateString(date);
     setSelectedDate(dateStr);
     setCurrentMonth(new Date(date.getFullYear(), date.getMonth(), 1));
-    setCalendarKey((k) => k + 1);
   }
 
   return (
@@ -128,7 +128,6 @@ export default function CalendarScreen() {
       </View>
 
       <MonthlyCalendar
-        key={calendarKey}
         events={events}
         selectedDate={selectedDate}
         onDayPress={handleDayPress}
@@ -167,21 +166,23 @@ export default function CalendarScreen() {
                 <Ionicons name="close" size={22} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
-            <DateTimePicker
-              value={new Date(selectedDate + "T00:00:00")}
-              mode="date"
-              locale="ja"
-              display="spinner"
-              onChange={(_: DateTimePickerEvent, d?: Date) => {
-                if (Platform.OS === "android") {
-                  setShowDatePicker(false);
-                  if (d) jumpToDate(d);
-                }
-                if (d && Platform.OS === "ios") {
-                  jumpToDate(d);
-                }
-              }}
-            />
+            <Suspense fallback={<ActivityIndicator size="small" />}>
+              <DateTimePicker
+                value={new Date(selectedDate + "T00:00:00")}
+                mode="date"
+                locale="ja"
+                display="spinner"
+                onChange={(_: DateTimePickerEvent, d?: Date) => {
+                  if (Platform.OS === "android") {
+                    setShowDatePicker(false);
+                    if (d) jumpToDate(d);
+                  }
+                  if (d && Platform.OS === "ios") {
+                    jumpToDate(d);
+                  }
+                }}
+              />
+            </Suspense>
             {(Platform.OS === "ios" || Platform.OS === "web") && (
               <TouchableOpacity
                 style={[styles.datePickerDone, { backgroundColor: colors.primary }]}

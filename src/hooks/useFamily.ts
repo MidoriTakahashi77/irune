@@ -6,5 +6,7 @@ export function useFamily(familyId: string | null | undefined) {
     queryKey: ["family-members", familyId],
     queryFn: () => fetchFamilyMembers(familyId!),
     enabled: !!familyId,
+    staleTime: 10 * 60 * 1000, // 10分間はrefetchしない
+    gcTime: 60 * 60 * 1000,    // 1時間キャッシュ保持
   });
 }

@@ -2,30 +2,20 @@ import { supabase } from "@/lib/supabase";
 import type { EventInsert, EventUpdate } from "@/types/events";
 
 export async function fetchEvents(familyId: string, start: string, end: string) {
-  // Fetch non-recurring events in the date range
-  const { data: regular, error: err1 } = await supabase
+  // 1クエリで全イベント取得（非繰り返し: 日付範囲内、繰り返し: start_at <= end）
+  // OR条件: (recurrence IS NULL AND start_at >= start AND start_at <= end) OR (recurrence IS NOT NULL AND start_at <= end)
+  const { data, error } = await supabase
     .from("events")
     .select("*, profiles:created_by(display_name, color)")
     .eq("family_id", familyId)
-    .is("recurrence", null)
-    .gte("start_at", start)
-    .lte("start_at", end)
+    .or(`and(recurrence.is.null,start_at.gte.${start},start_at.lte.${end}),and(recurrence.not.is.null,start_at.lte.${end})`)
     .order("start_at", { ascending: true });
 
-  if (err1) throw err1;
+  if (error) throw error;
 
-  // Fetch all recurring events (original start_at <= end of visible range)
-  const { data: recurring, error: err2 } = await supabase
-    .from("events")
-    .select("*, profiles:created_by(display_name, color)")
-    .eq("family_id", familyId)
-    .not("recurrence", "is", null)
-    .lte("start_at", end)
-    .order("start_at", { ascending: true });
-
-  if (err2) throw err2;
-
-  return { regular: regular ?? [], recurring: recurring ?? [] };
+  const regular = (data ?? []).filter((e) => !e.recurrence);
+  const recurring = (data ?? []).filter((e) => e.recurrence);
+  return { regular, recurring };
 }
 
 export async function fetchEvent(id: string) {

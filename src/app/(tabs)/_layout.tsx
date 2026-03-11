@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from "react-native";
+import { memo, useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,13 @@ const TABS: TabConfig[] = [
 const CIRCLE_SIZE = 40;
 const BAR_HEIGHT = 72;
 
-export default function TabsLayout() {
+const CustomTabBar = memo(function CustomTabBar({
+  state,
+  navigation,
+}: {
+  state: any;
+  navigation: any;
+}) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
@@ -34,58 +41,66 @@ export default function TabsLayout() {
   const barBg = scheme === "dark" ? "#1E1F23" : "#FFFFFF";
 
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      tabBar={({ state, navigation }) => (
-        <View style={[styles.wrapper, { paddingBottom: bottomPadding }]}>
-          <View style={[styles.tabBar, { backgroundColor: barBg }]}>
-            {TABS.map((tab, index) => {
-              const isActive = state.index === index;
-              return (
-                <TouchableOpacity
-                  key={tab.name}
-                  onPress={() => navigation.navigate(tab.name)}
-                  style={styles.tabItem}
-                  activeOpacity={0.7}
+    <View style={[styles.wrapper, { paddingBottom: bottomPadding }]}>
+      <View style={[styles.tabBar, { backgroundColor: barBg }]}>
+        {TABS.map((tab, index) => {
+          const isActive = state.index === index;
+          return (
+            <TouchableOpacity
+              key={tab.name}
+              onPress={() => navigation.navigate(tab.name)}
+              style={styles.tabItem}
+              activeOpacity={0.7}
+            >
+              {isActive ? (
+                <View
+                  style={[
+                    styles.activeCircle,
+                    { backgroundColor: tab.activeColor },
+                  ]}
                 >
-                  {isActive ? (
-                    <View
-                      style={[
-                        styles.activeCircle,
-                        { backgroundColor: tab.activeColor },
-                      ]}
-                    >
-                      <Ionicons name={tab.icon} size={20} color="#FFFFFF" />
-                    </View>
-                  ) : (
-                    <View style={styles.inactiveCircle}>
-                      <Ionicons
-                        name={tab.iconOutline}
-                        size={20}
-                        color={colors.textSecondary}
-                      />
-                    </View>
-                  )}
-                  <Text
-                    style={[
-                      styles.label,
-                      {
-                        color: isActive
-                          ? colors.primary
-                          : colors.textSecondary,
-                        fontWeight: isActive ? "700" : "400",
-                      },
-                    ]}
-                  >
-                    {t(tab.labelKey)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-      )}
-    >
+                  <Ionicons name={tab.icon} size={20} color="#FFFFFF" />
+                </View>
+              ) : (
+                <View style={styles.inactiveCircle}>
+                  <Ionicons
+                    name={tab.iconOutline}
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                </View>
+              )}
+              <Text
+                style={[
+                  styles.label,
+                  {
+                    color: isActive
+                      ? colors.primary
+                      : colors.textSecondary,
+                    fontWeight: isActive ? "700" : "400",
+                  },
+                ]}
+              >
+                {t(tab.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+});
+
+export default function TabsLayout() {
+  const renderTabBar = useCallback(
+    ({ state, navigation }: any) => (
+      <CustomTabBar state={state} navigation={navigation} />
+    ),
+    []
+  );
+
+  return (
+    <Tabs screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
       {TABS.map((tab) => (
         <Tabs.Screen key={tab.name} name={tab.name} />
       ))}
