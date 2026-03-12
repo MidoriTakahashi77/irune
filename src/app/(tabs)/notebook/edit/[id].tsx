@@ -7,7 +7,7 @@ import { useNote, useNotes, useUpsertNote } from "@/hooks/useNotes";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
-import { getTemplateByType } from "@/constants/lifenote-templates";
+import { getTemplateByType, isLifeNoteType } from "@/constants/lifenote-templates";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
@@ -117,11 +117,13 @@ export default function EditNoteScreen() {
         onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
         scrollEventThrottle={16}
       >
-        <Input
-          label={t("lifenote.noteTitle", "タイトル")}
-          value={title}
-          onChangeText={setTitle}
-        />
+        {note && !isLifeNoteType(note.note_type) && (
+          <Input
+            label={t("lifenote.noteTitle", "タイトル")}
+            value={title}
+            onChangeText={setTitle}
+          />
+        )}
 
         {template && (
           <TemplateFormRenderer
