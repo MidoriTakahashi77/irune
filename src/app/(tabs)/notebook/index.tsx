@@ -51,6 +51,7 @@ export default function NotebookScreen() {
 
       <View style={styles.tabs}>
         <TouchableOpacity
+          testID="tab-lifenote"
           style={[
             styles.tab,
             activeTab === "lifenote" && {
@@ -75,6 +76,7 @@ export default function NotebookScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          testID="tab-free"
           style={[
             styles.tab,
             activeTab === "free" && {

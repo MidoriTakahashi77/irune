@@ -79,6 +79,8 @@ export async function setupTestUser() {
 
   if (profile?.family_id) {
     await supabase.from("events").delete().eq("family_id", profile.family_id);
+    // notebook_pages are cascade-deleted via notes FK
+    await supabase.from("notes").delete().eq("family_id", profile.family_id);
   }
 
   // 4. Generate session via password login
