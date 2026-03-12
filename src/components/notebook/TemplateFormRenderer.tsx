@@ -5,6 +5,7 @@ import DateTimePicker, { type DateTimePickerEvent } from "@react-native-communit
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { TimelineEditor } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -15,6 +16,7 @@ interface TemplateFormRendererProps {
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
   scrollBy?: (amount: number) => void;
+  birthYear?: number;
 }
 
 export function TemplateFormRenderer({
@@ -22,6 +24,7 @@ export function TemplateFormRenderer({
   values,
   onChange,
   scrollBy,
+  birthYear,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -46,6 +49,7 @@ export function TemplateFormRenderer({
               values={values}
               onChange={onChange}
               scrollBy={scrollBy}
+              birthYear={birthYear}
             />
           ))}
         </View>
@@ -59,11 +63,13 @@ function FieldRenderer({
   values,
   onChange,
   scrollBy,
+  birthYear,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
   scrollBy?: (amount: number) => void;
+  birthYear?: number;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -116,10 +122,25 @@ function FieldRenderer({
   }
 
   if (field.type === "repeatable" && field.fields) {
+    const items = (values[field.key] as Json[] | undefined) ?? [];
+    const hasTimelineFields = field.fields.some((f) => f.key === "year") &&
+      field.fields.some((f) => f.key === "title");
+
+    if (hasTimelineFields) {
+      return (
+        <TimelineEditor
+          field={field}
+          items={items}
+          onChange={(items) => onChange(field.key, items)}
+          birthYear={birthYear}
+        />
+      );
+    }
+
     return (
       <RepeatableField
         field={field}
-        items={(values[field.key] as Json[] | undefined) ?? []}
+        items={items}
         onChange={(items) => onChange(field.key, items)}
       />
     );
