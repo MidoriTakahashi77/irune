@@ -82,7 +82,7 @@ export default function SettingsScreen() {
       style={[styles.safe, { backgroundColor: colors.background }]}
     >
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
+        <TouchableOpacity testID="back-button" onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text }]}>

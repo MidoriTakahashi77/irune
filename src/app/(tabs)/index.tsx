@@ -62,6 +62,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
             <TouchableOpacity
+              testID="settings-icon"
               onPress={() => router.push("/settings")}
               hitSlop={8}
             >
