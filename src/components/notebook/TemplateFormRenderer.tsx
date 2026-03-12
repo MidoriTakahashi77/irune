@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { TimelineView } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -109,12 +110,20 @@ function FieldRenderer({
   }
 
   if (field.type === "repeatable" && field.fields) {
+    const items = (values[field.key] as Json[] | undefined) ?? [];
+    const hasTimelineFields = field.fields.some((f) => f.key === "year") &&
+      field.fields.some((f) => f.key === "title");
     return (
-      <RepeatableField
-        field={field}
-        items={(values[field.key] as Json[] | undefined) ?? []}
-        onChange={(items) => onChange(field.key, items)}
-      />
+      <>
+        {hasTimelineFields && items.length > 0 && (
+          <TimelineView items={items} />
+        )}
+        <RepeatableField
+          field={field}
+          items={items}
+          onChange={(items) => onChange(field.key, items)}
+        />
+      </>
     );
   }
 
