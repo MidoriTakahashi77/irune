@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -24,6 +24,8 @@ export default function TemplateFormScreen() {
 
   const template = getTemplateByType(type ?? "");
   const upsertNote = useUpsertNote();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
   const [values, setValues] = useState<LifeNoteBody>({});
 
   function handleChange(key: string, value: Json) {
@@ -86,13 +88,22 @@ export default function TemplateFormScreen() {
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
       >
         <TemplateFormRenderer
           template={template}
           values={values}
           onChange={handleChange}
+          scrollBy={(amount) => {
+            scrollViewRef.current?.scrollTo({
+              y: scrollOffsetRef.current + amount,
+              animated: true,
+            });
+          }}
         />
       </ScrollView>
     </SafeAreaView>

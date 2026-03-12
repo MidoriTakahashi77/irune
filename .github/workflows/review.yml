@@ -1,8 +1,13 @@
 name: Claude Code Review
 
+# Disabled: uses Claude API (pay-per-use), not covered by Max plan
+# To re-enable, uncomment the 'on:' block and comment out 'on: workflow_dispatch'
 on:
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+
+# Original trigger (uncomment to re-enable):
+#  pull_request:
+#    branches: [main]
 
 concurrency:
   group: review-${{ github.ref }}
