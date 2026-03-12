@@ -1,5 +1,7 @@
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -118,6 +120,16 @@ function FieldRenderer({
     );
   }
 
+  if (field.type === "date") {
+    return (
+      <DateField
+        field={field}
+        value={(values[field.key] as string) ?? ""}
+        onChange={(v) => onChange(field.key, v)}
+      />
+    );
+  }
+
   return (
     <Input
       label={t(field.labelKey)}
@@ -131,6 +143,90 @@ function FieldRenderer({
           : undefined
       }
     />
+  );
+}
+
+function DateField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldDefinition;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { t } = useTranslation();
+  const scheme = useColorScheme();
+  const colors = Colors[scheme];
+  const [showPicker, setShowPicker] = useState(false);
+
+  const currentDate = value ? new Date(value) : undefined;
+
+  function formatDisplayDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  }
+
+  function handleChange(_: DateTimePickerEvent, selectedDate?: Date) {
+    if (Platform.OS === "android") {
+      setShowPicker(false);
+    }
+    if (selectedDate) {
+      const y = selectedDate.getFullYear();
+      const m = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const d = String(selectedDate.getDate()).padStart(2, "0");
+      onChange(`${y}-${m}-${d}`);
+    }
+  }
+
+  return (
+    <View style={styles.dateContainer}>
+      <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
+        {t(field.labelKey)}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.dateButton,
+          {
+            backgroundColor: colors.backgroundElement,
+            borderColor: colors.border,
+          },
+        ]}
+        onPress={() => setShowPicker(true)}
+      >
+        <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
+        <Text
+          style={[
+            styles.dateButtonText,
+            { color: value ? colors.text : colors.textSecondary },
+          ]}
+        >
+          {value
+            ? formatDisplayDate(value)
+            : field.placeholderKey
+              ? t(field.placeholderKey)
+              : ""}
+        </Text>
+      </TouchableOpacity>
+      {showPicker && (
+        <DateTimePicker
+          value={currentDate ?? new Date(1950, 0, 1)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          locale="ja"
+          maximumDate={new Date()}
+          onChange={handleChange}
+        />
+      )}
+      {Platform.OS === "ios" && showPicker && (
+        <TouchableOpacity
+          style={[styles.dateConfirmButton, { backgroundColor: colors.primary }]}
+          onPress={() => setShowPicker(false)}
+        >
+          <Text style={styles.dateConfirmText}>{t("common.done", "完了")}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -335,6 +431,33 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   addButtonText: {
+    fontSize: FontSize.sm,
+    fontWeight: "600",
+  },
+  dateContainer: {
+    marginBottom: Spacing.md,
+  },
+  dateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  dateButtonText: {
+    fontSize: FontSize.md,
+  },
+  dateConfirmButton: {
+    alignSelf: "flex-end",
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: Spacing.xs,
+  },
+  dateConfirmText: {
+    color: "#FFFFFF",
     fontSize: FontSize.sm,
     fontWeight: "600",
   },
