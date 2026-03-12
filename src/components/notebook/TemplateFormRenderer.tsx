@@ -1,8 +1,11 @@
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { TimelineEditor } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -12,12 +15,16 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  scrollBy?: (amount: number) => void;
+  birthYear?: number;
 }
 
 export function TemplateFormRenderer({
   template,
   values,
   onChange,
+  scrollBy,
+  birthYear,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -41,6 +48,8 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
+              scrollBy={scrollBy}
+              birthYear={birthYear}
             />
           ))}
         </View>
@@ -53,10 +62,14 @@ function FieldRenderer({
   field,
   values,
   onChange,
+  scrollBy,
+  birthYear,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  scrollBy?: (amount: number) => void;
+  birthYear?: number;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -109,11 +122,37 @@ function FieldRenderer({
   }
 
   if (field.type === "repeatable" && field.fields) {
+    const items = (values[field.key] as Json[] | undefined) ?? [];
+    const hasTimelineFields = field.fields.some((f) => f.key === "year") &&
+      field.fields.some((f) => f.key === "title");
+
+    if (hasTimelineFields) {
+      return (
+        <TimelineEditor
+          field={field}
+          items={items}
+          onChange={(items) => onChange(field.key, items)}
+          birthYear={birthYear}
+        />
+      );
+    }
+
     return (
       <RepeatableField
         field={field}
-        items={(values[field.key] as Json[] | undefined) ?? []}
+        items={items}
         onChange={(items) => onChange(field.key, items)}
+      />
+    );
+  }
+
+  if (field.type === "date") {
+    return (
+      <DateField
+        field={field}
+        value={(values[field.key] as string) ?? ""}
+        onChange={(v) => onChange(field.key, v)}
+        scrollBy={scrollBy}
       />
     );
   }
@@ -131,6 +170,112 @@ function FieldRenderer({
           : undefined
       }
     />
+  );
+}
+
+function DateField({
+  field,
+  value,
+  onChange,
+  scrollBy,
+}: {
+  field: FieldDefinition;
+  value: string;
+  onChange: (value: string) => void;
+  scrollBy?: (amount: number) => void;
+}) {
+  const { t } = useTranslation();
+  const scheme = useColorScheme();
+  const colors = Colors[scheme];
+  const [showPicker, setShowPicker] = useState(false);
+
+  const currentDate = value ? new Date(value) : undefined;
+
+  function formatDisplayDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  }
+
+  function handleOpen() {
+    const opening = !showPicker;
+    setShowPicker(opening);
+    if (opening) {
+      setTimeout(() => scrollBy?.(200), 100);
+    }
+  }
+
+  function handleChange(_: DateTimePickerEvent, selectedDate?: Date) {
+    if (Platform.OS === "android") {
+      setShowPicker(false);
+    }
+    if (selectedDate) {
+      const y = selectedDate.getFullYear();
+      const m = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const d = String(selectedDate.getDate()).padStart(2, "0");
+      onChange(`${y}-${m}-${d}`);
+    }
+  }
+
+  return (
+    <View style={styles.dateContainer}>
+      <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
+        {t(field.labelKey)}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.dateButton,
+          {
+            backgroundColor: colors.backgroundElement,
+            borderColor: showPicker ? colors.primary : colors.border,
+            borderWidth: showPicker ? 2 : 1,
+          },
+        ]}
+        onPress={handleOpen}
+      >
+        <Ionicons name="calendar-outline" size={20} color={showPicker ? colors.primary : colors.textSecondary} />
+        <Text
+          style={[
+            styles.dateButtonText,
+            { color: value ? colors.text : colors.textSecondary },
+          ]}
+        >
+          {value
+            ? formatDisplayDate(value)
+            : field.placeholderKey
+              ? t(field.placeholderKey)
+              : ""}
+        </Text>
+      </TouchableOpacity>
+      {showPicker && Platform.OS === "web" && (
+        <input
+          type="date"
+          value={value}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={(e) => {
+            if (e.target.value) onChange(e.target.value);
+          }}
+          style={{ fontSize: 16, padding: 8, marginTop: 8 }}
+        />
+      )}
+      {showPicker && Platform.OS !== "web" && (
+        <DateTimePicker
+          value={currentDate ?? new Date(1990, 0, 1)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          locale="ja"
+          maximumDate={new Date()}
+          onChange={handleChange}
+        />
+      )}
+      {Platform.OS === "ios" && showPicker && (
+        <TouchableOpacity
+          style={[styles.dateConfirmButton, { backgroundColor: colors.primary }]}
+          onPress={() => setShowPicker(false)}
+        >
+          <Text style={styles.dateConfirmText}>{t("common.done", "完了")}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -335,6 +480,33 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   addButtonText: {
+    fontSize: FontSize.sm,
+    fontWeight: "600",
+  },
+  dateContainer: {
+    marginBottom: Spacing.md,
+  },
+  dateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  dateButtonText: {
+    fontSize: FontSize.md,
+  },
+  dateConfirmButton: {
+    alignSelf: "flex-end",
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: Spacing.xs,
+  },
+  dateConfirmText: {
+    color: "#FFFFFF",
     fontSize: FontSize.sm,
     fontWeight: "600",
   },

@@ -318,12 +318,12 @@ export const LIFE_NOTE_TEMPLATES: LifeNoteTemplate[] = [
         titleKey: "lifenote.sections.historyInfo",
         descriptionKey: "lifenote.descriptions.historyInfo",
         fields: [
-          { key: "childhood", labelKey: "lifenote.fields.childhood", type: "textarea", placeholderKey: "lifenote.placeholders.childhood" },
-          { key: "school", labelKey: "lifenote.fields.school", type: "textarea", placeholderKey: "lifenote.placeholders.school" },
-          { key: "career", labelKey: "lifenote.fields.career", type: "textarea", placeholderKey: "lifenote.placeholders.career" },
-          { key: "marriage", labelKey: "lifenote.fields.marriage", type: "textarea", placeholderKey: "lifenote.placeholders.marriage" },
-          { key: "memorable_events", labelKey: "lifenote.fields.memorableEvents", type: "textarea", placeholderKey: "lifenote.placeholders.memorableEvents" },
-          { key: "lessons", labelKey: "lifenote.fields.lessons", type: "textarea", placeholderKey: "lifenote.placeholders.lessons" },
+          { key: "events", labelKey: "lifenote.fields.lifeEvents", type: "repeatable", fields: [
+            { key: "year", labelKey: "lifenote.fields.eventYear", type: "text", placeholderKey: "lifenote.placeholders.eventYear" },
+            { key: "age", labelKey: "lifenote.fields.eventAge", type: "text", placeholderKey: "lifenote.placeholders.eventAge" },
+            { key: "title", labelKey: "lifenote.fields.eventTitle", type: "text", placeholderKey: "lifenote.placeholders.eventTitle" },
+            { key: "detail", labelKey: "lifenote.fields.eventDetail", type: "textarea", placeholderKey: "lifenote.placeholders.eventDetail" },
+          ]},
         ],
       },
     ],
