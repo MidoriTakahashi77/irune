@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform } from "react-native";
+import { useRef, useState } from "react";
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform, type ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,12 +14,14 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  scrollViewRef?: React.RefObject<ScrollView | null>;
 }
 
 export function TemplateFormRenderer({
   template,
   values,
   onChange,
+  scrollViewRef,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -43,6 +45,7 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
+              scrollViewRef={scrollViewRef}
             />
           ))}
         </View>
@@ -55,10 +58,12 @@ function FieldRenderer({
   field,
   values,
   onChange,
+  scrollViewRef,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  scrollViewRef?: React.RefObject<ScrollView | null>;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -126,6 +131,7 @@ function FieldRenderer({
         field={field}
         value={(values[field.key] as string) ?? ""}
         onChange={(v) => onChange(field.key, v)}
+        scrollViewRef={scrollViewRef}
       />
     );
   }
@@ -150,21 +156,40 @@ function DateField({
   field,
   value,
   onChange,
+  scrollViewRef,
 }: {
   field: FieldDefinition;
   value: string;
   onChange: (value: string) => void;
+  scrollViewRef?: React.RefObject<ScrollView | null>;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef<View>(null);
 
   const currentDate = value ? new Date(value) : undefined;
 
   function formatDisplayDate(dateStr: string): string {
     const d = new Date(dateStr);
     return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  }
+
+  function handleOpen() {
+    const opening = !showPicker;
+    setShowPicker(opening);
+    if (opening) {
+      setTimeout(() => {
+        pickerRef.current?.measureLayout(
+          scrollViewRef?.current?.getInnerViewNode?.() ?? (scrollViewRef?.current as any),
+          (_x: number, y: number) => {
+            scrollViewRef?.current?.scrollTo({ y: y - 40, animated: true });
+          },
+          () => {}
+        );
+      }, 100);
+    }
   }
 
   function handleChange(_: DateTimePickerEvent, selectedDate?: Date) {
@@ -189,12 +214,13 @@ function DateField({
           styles.dateButton,
           {
             backgroundColor: colors.backgroundElement,
-            borderColor: colors.border,
+            borderColor: showPicker ? colors.primary : colors.border,
+            borderWidth: showPicker ? 2 : 1,
           },
         ]}
-        onPress={() => setShowPicker(true)}
+        onPress={handleOpen}
       >
-        <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
+        <Ionicons name="calendar-outline" size={20} color={showPicker ? colors.primary : colors.textSecondary} />
         <Text
           style={[
             styles.dateButtonText,
@@ -208,16 +234,18 @@ function DateField({
               : ""}
         </Text>
       </TouchableOpacity>
-      {showPicker && (
-        <DateTimePicker
-          value={currentDate ?? new Date(1990, 0, 1)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          locale="ja"
-          maximumDate={new Date()}
-          onChange={handleChange}
-        />
-      )}
+      <View ref={pickerRef}>
+        {showPicker && (
+          <DateTimePicker
+            value={currentDate ?? new Date(1990, 0, 1)}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            locale="ja"
+            maximumDate={new Date()}
+            onChange={handleChange}
+          />
+        )}
+      </View>
       {Platform.OS === "ios" && showPicker && (
         <TouchableOpacity
           style={[styles.dateConfirmButton, { backgroundColor: colors.primary }]}

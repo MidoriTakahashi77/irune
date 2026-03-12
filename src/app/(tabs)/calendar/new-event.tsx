@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -63,6 +63,8 @@ export default function NewEventScreen() {
   const initialEnd = new Date(`${selectedDate}T${defaultEndHour}:00:00`);
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const pickerRef = useRef<View>(null);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [startPickerMode, setStartPickerMode] = useState<"date" | "time">(
@@ -137,6 +139,18 @@ export default function NewEventScreen() {
     router.back();
   }
 
+  function scrollToPicker() {
+    setTimeout(() => {
+      pickerRef.current?.measureLayout(
+        scrollViewRef.current as any,
+        (_x: number, y: number) => {
+          scrollViewRef.current?.scrollTo({ y: y - 40, animated: true });
+        },
+        () => {}
+      );
+    }, 100);
+  }
+
   function renderDatePicker(
     label: string,
     date: Date,
@@ -157,18 +171,21 @@ export default function NewEventScreen() {
               styles.dateButton,
               {
                 backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
+                borderColor: showPicker && pickerMode === "date" ? colors.primary : colors.border,
+                borderWidth: showPicker && pickerMode === "date" ? 2 : 1,
               },
             ]}
             onPress={() => {
+              const opening = !showPicker || pickerMode !== "date";
               setPickerMode("date");
-              setShowPicker(true);
+              setShowPicker(opening);
+              if (opening) scrollToPicker();
             }}
           >
             <Ionicons
               name="calendar-outline"
               size={18}
-              color={colors.textSecondary}
+              color={showPicker && pickerMode === "date" ? colors.primary : colors.textSecondary}
             />
             <Text style={[styles.dateButtonText, { color: colors.text }]}>
               {formatDateOnly(date)}
@@ -180,18 +197,21 @@ export default function NewEventScreen() {
                 styles.dateButton,
                 {
                   backgroundColor: colors.backgroundElement,
-                  borderColor: colors.border,
+                  borderColor: showPicker && pickerMode === "time" ? colors.primary : colors.border,
+                  borderWidth: showPicker && pickerMode === "time" ? 2 : 1,
                 },
               ]}
               onPress={() => {
+                const opening = !showPicker || pickerMode !== "time";
                 setPickerMode("time");
-                setShowPicker(true);
+                setShowPicker(opening);
+                if (opening) scrollToPicker();
               }}
             >
               <Ionicons
                 name="time-outline"
                 size={18}
-                color={colors.textSecondary}
+                color={showPicker && pickerMode === "time" ? colors.primary : colors.textSecondary}
               />
               <Text style={[styles.dateButtonText, { color: colors.text }]}>
                 {formatTimeOnly(date)}
@@ -199,19 +219,20 @@ export default function NewEventScreen() {
             </TouchableOpacity>
           )}
         </View>
-        {showPicker && (
-          <>
-            {Platform.OS === "ios" && (
-              <TouchableOpacity
-                style={styles.pickerDone}
-                onPress={() => setShowPicker(false)}
-              >
-                <Text style={{ color: colors.primary, fontWeight: "600" }}>
-                  {t("event.done")}
-                </Text>
-              </TouchableOpacity>
-            )}
-            <DateTimePicker
+        <View ref={pickerRef}>
+          {showPicker && (
+            <>
+              {Platform.OS === "ios" && (
+                <TouchableOpacity
+                  style={styles.pickerDone}
+                  onPress={() => setShowPicker(false)}
+                >
+                  <Text style={{ color: colors.primary, fontWeight: "600" }}>
+                    {t("event.done")}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <DateTimePicker
               value={date}
               mode={showTime ? pickerMode : "date"}
               is24Hour
@@ -231,9 +252,10 @@ export default function NewEventScreen() {
                   }
                 }
               }}
-            />
-          </>
-        )}
+              />
+            </>
+          )}
+        </View>
       </>
     );
   }
@@ -247,6 +269,7 @@ export default function NewEventScreen() {
         style={styles.flex}
       >
         <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
