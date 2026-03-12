@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -33,6 +33,8 @@ export default function EditNoteScreen() {
     return bd ? new Date(bd).getFullYear() : undefined;
   })();
 
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
   const [title, setTitle] = useState("");
   const [bodyValues, setBodyValues] = useState<LifeNoteBody>({});
 
@@ -109,8 +111,11 @@ export default function EditNoteScreen() {
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
       >
         <Input
           label={t("lifenote.noteTitle", "タイトル")}
@@ -124,6 +129,12 @@ export default function EditNoteScreen() {
             values={bodyValues}
             onChange={handleFieldChange}
             birthYear={birthYear}
+            scrollBy={(amount) => {
+              scrollViewRef.current?.scrollTo({
+                y: scrollOffsetRef.current + amount,
+                animated: true,
+              });
+            }}
           />
         )}
       </ScrollView>

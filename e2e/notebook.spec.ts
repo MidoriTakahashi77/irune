@@ -49,7 +49,7 @@ test("ライフノートのテンプレートフォームを開ける", async ({
 });
 
 // ============================================================
-// 人生記録タイムラインテスト（順序依存のため serial）
+// 人生記録タイムラインテスト
 // ============================================================
 
 test.describe("人生記録タイムライン", () => {
@@ -128,6 +128,62 @@ test.describe("人生記録タイムライン", () => {
     await expect(page.getByText("転職")).not.toBeVisible({ timeout: 3000 });
     await expect(page.getByText("1980")).toBeVisible();
     await expect(page.getByText("誕生")).toBeVisible();
+  });
+});
+
+// ============================================================
+// 生年月日ピッカーテスト（順序依存のため serial）
+// ============================================================
+
+test.describe.serial("生年月日ピッカー", () => {
+  test("生年月日フィールドをタップすると日付ピッカーが表示される", async ({ page }) => {
+    await page.getByText(/基本情報|Profile/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // 生年月日フィールドのボタンをクリック
+    await page.getByText(/例: 1950-04-01|e\.g\. 1950-04-01/).click();
+
+    // Web上ではHTML date inputが表示される
+    const dateInput = page.locator('input[type="date"]');
+    await expect(dateInput).toBeVisible({ timeout: 3000 });
+  });
+
+  test("日付を選択後、YYYY年M月D日形式で表示される", async ({ page }) => {
+    await page.getByText(/基本情報|Profile/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // ピッカーを開いて日付を入力
+    await page.getByText(/例: 1950-04-01|e\.g\. 1950-04-01/).click();
+    const dateInput = page.locator('input[type="date"]');
+    await dateInput.fill("1990-06-15");
+
+    // 「1990年6月15日」形式で表示されることを確認
+    await expect(page.getByText("1990年6月15日")).toBeVisible({ timeout: 3000 });
+  });
+
+  test("保存後のデータがISO形式（YYYY-MM-DD）で格納される", async ({ page }) => {
+    await page.getByText(/基本情報|Profile/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // 生年月日を設定
+    await page.getByText(/例: 1950-04-01|e\.g\. 1950-04-01/).click();
+    const dateInput = page.locator('input[type="date"]');
+    await dateInput.fill("1985-12-25");
+    await expect(page.getByText("1985年12月25日")).toBeVisible({ timeout: 3000 });
+
+    // 保存
+    await blurActiveInput(page);
+    await page.getByText(/保存|Save/).click();
+    await expect(page.getByText(/ライフノート|Life Note/)).toBeVisible({ timeout: 10000 });
+
+    // 保存されたノートを開いて確認
+    await page.getByText(/基本情報|Profile/).click();
+    await expect(page.getByText("1985年12月25日")).toBeVisible({ timeout: 5000 });
+
+    // 編集画面のdate inputのvalueがISO形式であることを確認
+    await page.getByText("1985年12月25日").click();
+    const editDateInput = page.locator('input[type="date"]');
+    await expect(editDateInput).toHaveValue("1985-12-25");
   });
 });
 
