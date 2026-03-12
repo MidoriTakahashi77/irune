@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform, type ScrollView } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,14 +14,14 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
-  scrollViewRef?: React.RefObject<ScrollView | null>;
+  scrollBy?: (amount: number) => void;
 }
 
 export function TemplateFormRenderer({
   template,
   values,
   onChange,
-  scrollViewRef,
+  scrollBy,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -45,7 +45,7 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
-              scrollViewRef={scrollViewRef}
+              scrollBy={scrollBy}
             />
           ))}
         </View>
@@ -58,12 +58,12 @@ function FieldRenderer({
   field,
   values,
   onChange,
-  scrollViewRef,
+  scrollBy,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
-  scrollViewRef?: React.RefObject<ScrollView | null>;
+  scrollBy?: (amount: number) => void;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -131,7 +131,7 @@ function FieldRenderer({
         field={field}
         value={(values[field.key] as string) ?? ""}
         onChange={(v) => onChange(field.key, v)}
-        scrollViewRef={scrollViewRef}
+        scrollBy={scrollBy}
       />
     );
   }
@@ -156,18 +156,17 @@ function DateField({
   field,
   value,
   onChange,
-  scrollViewRef,
+  scrollBy,
 }: {
   field: FieldDefinition;
   value: string;
   onChange: (value: string) => void;
-  scrollViewRef?: React.RefObject<ScrollView | null>;
+  scrollBy?: (amount: number) => void;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const [showPicker, setShowPicker] = useState(false);
-  const buttonYRef = useRef(0);
 
   const currentDate = value ? new Date(value) : undefined;
 
@@ -179,10 +178,8 @@ function DateField({
   function handleOpen() {
     const opening = !showPicker;
     setShowPicker(opening);
-    if (opening && scrollViewRef?.current) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ y: buttonYRef.current, animated: true });
-      }, 100);
+    if (opening) {
+      setTimeout(() => scrollBy?.(200), 100);
     }
   }
 
@@ -199,10 +196,7 @@ function DateField({
   }
 
   return (
-    <View
-      style={styles.dateContainer}
-      onLayout={(e) => { buttonYRef.current = e.nativeEvent.layout.y; }}
-    >
+    <View style={styles.dateContainer}>
       <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
         {t(field.labelKey)}
       </Text>

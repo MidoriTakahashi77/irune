@@ -64,7 +64,7 @@ export default function NewEventScreen() {
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
   const scrollViewRef = useRef<ScrollView>(null);
-  const pickerYRef = useRef(0);
+  const scrollOffsetRef = useRef(0);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [startPickerMode, setStartPickerMode] = useState<"date" | "time">(
@@ -141,7 +141,10 @@ export default function NewEventScreen() {
 
   function scrollToPicker() {
     setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: pickerYRef.current, animated: true });
+      scrollViewRef.current?.scrollTo({
+        y: scrollOffsetRef.current + 200,
+        animated: true,
+      });
     }, 100);
   }
 
@@ -213,7 +216,7 @@ export default function NewEventScreen() {
             </TouchableOpacity>
           )}
         </View>
-        <View onLayout={(e) => { pickerYRef.current = e.nativeEvent.layout.y; }}>
+        <View>
           {showPicker && (
             <>
               {Platform.OS === "ios" && (
@@ -266,6 +269,8 @@ export default function NewEventScreen() {
           ref={scrollViewRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
+          onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+          scrollEventThrottle={16}
         >
           <View style={styles.header}>
             <Button

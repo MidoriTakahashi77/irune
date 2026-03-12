@@ -25,6 +25,7 @@ export default function TemplateFormScreen() {
   const template = getTemplateByType(type ?? "");
   const upsertNote = useUpsertNote();
   const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
   const [values, setValues] = useState<LifeNoteBody>({});
 
   function handleChange(key: string, value: Json) {
@@ -90,12 +91,19 @@ export default function TemplateFormScreen() {
         ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
       >
         <TemplateFormRenderer
           template={template}
           values={values}
           onChange={handleChange}
-          scrollViewRef={scrollViewRef}
+          scrollBy={(amount) => {
+            scrollViewRef.current?.scrollTo({
+              y: scrollOffsetRef.current + amount,
+              animated: true,
+            });
+          }}
         />
       </ScrollView>
     </SafeAreaView>
