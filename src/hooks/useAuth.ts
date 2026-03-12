@@ -10,6 +10,7 @@ export function useAuth() {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingFamilyId, setPendingFamilyId] = useState<string | null>(null);
+  const [didSignOut, setDidSignOut] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -120,7 +121,14 @@ export function useAuth() {
    * 匿名ユーザーをメールアドレスに紐付け（アカウントアップグレード）
    */
   async function linkEmail(email: string) {
-    const { error } = await supabase.auth.updateUser({ email });
+    const emailRedirectTo =
+      Platform.OS === "web"
+        ? `${window.location.origin}/auth-callback`
+        : "irune:///auth-callback";
+    const { error } = await supabase.auth.updateUser({
+      email,
+      options: { emailRedirectTo },
+    });
     if (error) throw error;
   }
 
@@ -182,6 +190,7 @@ export function useAuth() {
   }
 
   async function signOut() {
+    setDidSignOut(true);
     await supabase.auth.signOut();
     setPendingFamilyId(null);
   }
@@ -203,6 +212,7 @@ export function useAuth() {
     verifyOtp,
     setupProfile,
     signOut,
+    didSignOut,
     clearPendingFamilyId,
   };
 }

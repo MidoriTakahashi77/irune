@@ -1,13 +1,13 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
 import { useFamily } from "@/hooks/useFamily";
 import { ScheduleList } from "@/components/calendar/ScheduleList";
 import { MemberAvatarList } from "@/components/family/MemberAvatarList";
-import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { toDateString } from "@/utils/date";
@@ -16,7 +16,7 @@ import type { EventRow } from "@/types/events";
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { profile, signOut } = useAuth();
+  const { profile, isAnonymous } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
 
@@ -51,12 +51,27 @@ export default function HomeScreen() {
               ? `${profile.display_name}さん`
               : t("tabs.home")}
           </Text>
-          <Button
-            title={t("auth.logout")}
-            onPress={signOut}
-            variant="ghost"
-            textStyle={{ fontSize: FontSize.sm }}
-          />
+          <View style={styles.headerRight}>
+            {isAnonymous && (
+              <TouchableOpacity
+                onPress={() => router.push("/(auth)/login")}
+                style={[styles.loginButton, { backgroundColor: colors.primary }]}
+              >
+                <Ionicons name="log-in-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.loginText}>{t("auth.login")}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => router.push("/settings")}
+              hitSlop={8}
+            >
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <MemberAvatarList
@@ -85,5 +100,23 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: FontSize.xl,
     fontWeight: "bold",
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  loginButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  loginText: {
+    color: "#FFFFFF",
+    fontSize: FontSize.sm,
+    fontWeight: "600",
   },
 });

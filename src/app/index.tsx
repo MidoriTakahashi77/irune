@@ -13,6 +13,7 @@ export default function IndexScreen() {
     loading,
     isAnonymous,
     pendingFamilyId,
+    didSignOut,
     signInAnonymously,
   } = useAuth();
   const scheme = useColorScheme();
@@ -23,7 +24,12 @@ export default function IndexScreen() {
     if (loading || settingUp) return;
 
     if (!session) {
-      // セッション無し → 匿名サインインで即利用開始
+      if (didSignOut) {
+        // 明示的にログアウトした場合はログイン画面へ
+        router.replace("/(auth)/login");
+        return;
+      }
+      // 初回起動 → 匿名サインインで即利用開始
       setSettingUp(true);
       signInAnonymously()
         .then(() => {
@@ -31,7 +37,6 @@ export default function IndexScreen() {
         })
         .catch((err) => {
           console.error("Anonymous sign-in failed:", err);
-          // フォールバック: ログイン画面へ
           router.replace("/(auth)/login");
         })
         .finally(() => setSettingUp(false));
@@ -55,10 +60,13 @@ export default function IndexScreen() {
       router.replace("/(auth)/join-family");
     } else if (!profile.family_id) {
       router.replace("/(auth)/create-family");
+    } else if (!profile.display_name || profile.display_name === "ゲスト") {
+      // 名前未設定 → 基本情報入力画面へ
+      router.replace("/(tabs)/notebook/template/life_profile");
     } else {
       router.replace("/(tabs)");
     }
-  }, [session, profile, loading, isAnonymous, pendingFamilyId, settingUp]);
+  }, [session, profile, loading, isAnonymous, pendingFamilyId, didSignOut, settingUp]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
