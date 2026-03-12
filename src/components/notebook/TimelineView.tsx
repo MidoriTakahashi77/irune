@@ -126,6 +126,7 @@ export function TimelineEditor({ field, items, onChange, birthYear }: TimelineEd
                   <Card style={styles.editCard}>
                     <View style={styles.editCardHeader}>
                       <TouchableOpacity
+                        testID={`timeline-delete-${index}`}
                         onPress={() => removeItem(index)}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
