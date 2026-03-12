@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { TimelineView } from "@/components/notebook/TimelineView";
+import { TimelineEditor } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -118,18 +118,24 @@ function FieldRenderer({
     const items = (values[field.key] as Json[] | undefined) ?? [];
     const hasTimelineFields = field.fields.some((f) => f.key === "year") &&
       field.fields.some((f) => f.key === "title");
-    return (
-      <>
-        {hasTimelineFields && items.length > 0 && (
-          <TimelineView items={items} />
-        )}
-        <RepeatableField
+
+    if (hasTimelineFields) {
+      return (
+        <TimelineEditor
           field={field}
           items={items}
           onChange={(items) => onChange(field.key, items)}
-          birthYear={hasTimelineFields ? birthYear : undefined}
+          birthYear={birthYear}
         />
-      </>
+      );
+    }
+
+    return (
+      <RepeatableField
+        field={field}
+        items={items}
+        onChange={(items) => onChange(field.key, items)}
+      />
     );
   }
 
@@ -153,12 +159,10 @@ function RepeatableField({
   field,
   items,
   onChange,
-  birthYear,
 }: {
   field: FieldDefinition;
   items: Json[];
   onChange: (items: Json[]) => void;
-  birthYear?: number;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -180,19 +184,7 @@ function RepeatableField({
   function updateItem(index: number, subKey: string, value: Json) {
     const updated = items.map((item, i) => {
       if (i !== index) return item;
-      const record = { ...(item as Record<string, Json>), [subKey]: value };
-      // 生年月日から年↔年齢を自動計算
-      if (birthYear && (subKey === "year" || subKey === "age")) {
-        const num = parseInt(value as string, 10);
-        if (!isNaN(num)) {
-          if (subKey === "year") {
-            record.age = String(num - birthYear);
-          } else {
-            record.year = String(birthYear + num);
-          }
-        }
-      }
-      return record;
+      return { ...(item as Record<string, Json>), [subKey]: value };
     });
     onChange(updated);
   }
