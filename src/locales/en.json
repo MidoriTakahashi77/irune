@@ -193,6 +193,7 @@
   },
   "lifenote": {
     "addItem": "Add",
+    "tapToEdit": "Tap to edit",
     "subscriptionPicker": {
       "title": "Select a service",
       "selectFromPreset": "Select from presets",

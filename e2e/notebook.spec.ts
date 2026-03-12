@@ -414,7 +414,11 @@ test.describe("サブスクリプションプリセット", () => {
     // 再度開いてデータが保持されていることを確認
     await page.getByText(/契約|Contracts/).click();
     await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('input[value="Netflix"]')).toBeVisible({ timeout: 5000 });
+    // サマリー行にNetflixが表示されていることを確認
+    await expect(page.getByText("Netflix")).toBeVisible({ timeout: 5000 });
+    // タップして展開し、入力値を確認
+    await page.getByText("Netflix").click();
+    await expect(page.locator('input[value="Netflix"]')).toBeVisible({ timeout: 3000 });
   });
 });
 

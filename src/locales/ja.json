@@ -193,6 +193,7 @@
   },
   "lifenote": {
     "addItem": "追加する",
+    "tapToEdit": "タップして編集",
     "subscriptionPicker": {
       "title": "サービスを選択",
       "selectFromPreset": "プリセットから選択",
