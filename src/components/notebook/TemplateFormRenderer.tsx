@@ -167,7 +167,7 @@ function DateField({
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const [showPicker, setShowPicker] = useState(false);
-  const pickerRef = useRef<View>(null);
+  const buttonYRef = useRef(0);
 
   const currentDate = value ? new Date(value) : undefined;
 
@@ -179,15 +179,9 @@ function DateField({
   function handleOpen() {
     const opening = !showPicker;
     setShowPicker(opening);
-    if (opening) {
+    if (opening && scrollViewRef?.current) {
       setTimeout(() => {
-        pickerRef.current?.measureLayout(
-          scrollViewRef?.current?.getInnerViewNode?.() ?? (scrollViewRef?.current as any),
-          (_x: number, y: number) => {
-            scrollViewRef?.current?.scrollTo({ y: y - 40, animated: true });
-          },
-          () => {}
-        );
+        scrollViewRef.current?.scrollTo({ y: buttonYRef.current, animated: true });
       }, 100);
     }
   }
@@ -205,7 +199,10 @@ function DateField({
   }
 
   return (
-    <View style={styles.dateContainer}>
+    <View
+      style={styles.dateContainer}
+      onLayout={(e) => { buttonYRef.current = e.nativeEvent.layout.y; }}
+    >
       <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
         {t(field.labelKey)}
       </Text>
@@ -234,18 +231,16 @@ function DateField({
               : ""}
         </Text>
       </TouchableOpacity>
-      <View ref={pickerRef}>
-        {showPicker && (
-          <DateTimePicker
-            value={currentDate ?? new Date(1990, 0, 1)}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            locale="ja"
-            maximumDate={new Date()}
-            onChange={handleChange}
-          />
-        )}
-      </View>
+      {showPicker && (
+        <DateTimePicker
+          value={currentDate ?? new Date(1990, 0, 1)}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          locale="ja"
+          maximumDate={new Date()}
+          onChange={handleChange}
+        />
+      )}
       {Platform.OS === "ios" && showPicker && (
         <TouchableOpacity
           style={[styles.dateConfirmButton, { backgroundColor: colors.primary }]}
