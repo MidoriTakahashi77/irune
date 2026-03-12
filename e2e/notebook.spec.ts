@@ -49,6 +49,76 @@ test("ライフノートのテンプレートフォームを開ける", async ({
 });
 
 // ============================================================
+// 介護・葬儀セクション選択式フォームテスト
+// ============================================================
+
+test.describe("介護・葬儀セクション", () => {
+  test("介護テンプレートで選択フィールドが表示される", async ({ page }) => {
+    await page.getByText(/介護|Care/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // 3つの選択フィールドが表示される
+    await expect(page.getByText(/暮らしたい場所|Preferred Living/)).toBeVisible();
+    await expect(page.getByText(/介護で重視|Care Priority/i)).toBeVisible();
+    await expect(page.getByText(/介護認定|Care Certification/i)).toBeVisible();
+
+    // 選択肢が表示される
+    await expect(page.getByText(/^自宅$|^Home$/)).toBeVisible();
+    await expect(page.getByText(/^施設$|^Care Facility$/)).toBeVisible();
+    await expect(page.getByText(/まだ決めていない|Undecided/)).toBeVisible();
+  });
+
+  test("葬儀テンプレートで各フィールドの選択肢をタップできる", async ({ page }) => {
+    await page.getByText(/葬儀|Funeral/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // 3つの選択フィールドが表示される
+    await expect(page.getByText(/葬儀の形式|Funeral Style/)).toBeVisible();
+    await expect(page.getByText(/お墓・納骨|Burial/)).toBeVisible();
+    await expect(page.getByText(/費用の目安|Budget/)).toBeVisible();
+
+    // 葬儀形式で「家族葬」を選択
+    await page.getByText(/家族葬|Family Only/).click();
+
+    // お墓で「樹木葬」を選択
+    await page.getByText(/樹木葬|Tree Burial/).click();
+
+    // 費用で「一般的な範囲で」を選択
+    await page.getByText(/一般的な範囲|Standard/).click();
+
+    // キャンセルで戻る
+    await page.getByText(/キャンセル|Cancel/).click();
+    await expect(page.getByText(/ライフノート|Life Note/)).toBeVisible({ timeout: 5000 });
+  });
+
+  test("介護フォームで選択して保存後にデータが反映される", async ({ page }) => {
+    await page.getByText(/介護|Care/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+
+    // 暮らしたい場所: 自宅
+    await page.getByText(/自宅|Home/).first().click();
+    // 介護で重視すること: 安全・安心
+    await page.getByText(/安全|safety/i).click();
+    // 介護認定: 受けていない
+    await page.getByText(/受けていない|No$/).click();
+
+    // 保存
+    await blurActiveInput(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+    await page.getByText(/^保存$|^Save$/).click({ force: true });
+
+    await page.waitForTimeout(1000);
+    await expect(page.getByText(/ライフノート|Life Note/)).toBeVisible({ timeout: 15000 });
+
+    // 再度開いてフォームが正常に表示されることを確認
+    await page.getByText(/介護|Care/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/暮らしたい場所|Preferred Living/)).toBeVisible();
+  });
+});
+
+// ============================================================
 // ノートブック CRUD テスト（順序依存のため serial）
 // ============================================================
 

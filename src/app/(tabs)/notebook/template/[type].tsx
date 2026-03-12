@@ -7,16 +7,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUpsertNote } from "@/hooks/useNotes";
 import { supabase } from "@/lib/supabase";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
-import { WizardForm } from "@/components/notebook/WizardForm";
 import { getTemplateByType } from "@/constants/lifenote-templates";
 import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
 import type { LifeNoteBody } from "@/types/notes";
-
-const WIZARD_TYPES = ["life_care", "life_funeral"] as const;
-type WizardType = (typeof WIZARD_TYPES)[number];
 
 export default function TemplateFormScreen() {
   const { t } = useTranslation();
@@ -29,8 +25,6 @@ export default function TemplateFormScreen() {
   const template = getTemplateByType(type ?? "");
   const upsertNote = useUpsertNote();
   const [values, setValues] = useState<LifeNoteBody>({});
-  const needsWizard = WIZARD_TYPES.includes(type as WizardType);
-  const [showWizard, setShowWizard] = useState(needsWizard);
 
   function handleChange(key: string, value: Json) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -69,32 +63,6 @@ export default function TemplateFormScreen() {
           </Text>
           <Button title={t("common.back")} onPress={() => router.back()} />
         </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (showWizard) {
-    return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-        <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
-          <Button
-            title={t("common.cancel")}
-            onPress={() => router.back()}
-            variant="ghost"
-          />
-          <Text style={[styles.topBarTitle, { color: colors.text }]}>
-            {t(template.titleKey)}
-          </Text>
-          <View style={{ width: 60 }} />
-        </View>
-        <WizardForm
-          type={type as WizardType}
-          onComplete={(wizardValues) => {
-            setValues((prev) => ({ ...prev, ...wizardValues }));
-            setShowWizard(false);
-          }}
-          onSkip={() => setShowWizard(false)}
-        />
       </SafeAreaView>
     );
   }

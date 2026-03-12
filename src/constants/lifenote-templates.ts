@@ -60,6 +60,9 @@ export const LIFE_NOTE_TEMPLATES: LifeNoteTemplate[] = [
         titleKey: "lifenote.sections.careInfo",
         descriptionKey: "lifenote.descriptions.careInfo",
         fields: [
+          { key: "care_location_pref", labelKey: "lifenote.fields.careLocationPref", type: "select", options: ["home", "facility", "undecided"] },
+          { key: "care_priority", labelKey: "lifenote.fields.carePriority", type: "select", options: ["independence", "safety", "family_burden"] },
+          { key: "care_certified", labelKey: "lifenote.fields.careCertified", type: "select", options: ["certified_yes", "certified_no", "certified_unknown"] },
           { key: "care_wishes", labelKey: "lifenote.fields.careWishes", type: "textarea", placeholderKey: "lifenote.placeholders.careWishes" },
           { key: "preferred_facility", labelKey: "lifenote.fields.preferredFacility", type: "text", placeholderKey: "lifenote.placeholders.preferredFacility" },
           { key: "care_manager", labelKey: "lifenote.fields.careManager", type: "text", placeholderKey: "lifenote.placeholders.careManager" },
@@ -80,9 +83,10 @@ export const LIFE_NOTE_TEMPLATES: LifeNoteTemplate[] = [
         descriptionKey: "lifenote.descriptions.funeralInfo",
         fields: [
           { key: "funeral_style", labelKey: "lifenote.fields.funeralStyle", type: "select", options: ["religious", "secular", "family_only", "no_funeral"] },
+          { key: "burial_type", labelKey: "lifenote.fields.burialType", type: "select", options: ["grave", "tree_burial", "sea_scattering", "undecided"] },
+          { key: "budget_range", labelKey: "lifenote.fields.budgetRange", type: "select", options: ["minimal", "standard", "generous", "undecided"] },
           { key: "religion", labelKey: "lifenote.fields.religion", type: "text", placeholderKey: "lifenote.placeholders.religion" },
           { key: "preferred_company", labelKey: "lifenote.fields.preferredCompany", type: "text", placeholderKey: "lifenote.placeholders.preferredCompany" },
-          { key: "budget", labelKey: "lifenote.fields.budget", type: "text", placeholderKey: "lifenote.placeholders.budget" },
           { key: "music", labelKey: "lifenote.fields.music", type: "textarea", placeholderKey: "lifenote.placeholders.music" },
           { key: "flowers", labelKey: "lifenote.fields.flowers", type: "text", placeholderKey: "lifenote.placeholders.flowers" },
           { key: "photo", labelKey: "lifenote.fields.photo", type: "text", placeholderKey: "lifenote.placeholders.photo" },
