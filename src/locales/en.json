@@ -193,6 +193,18 @@
   },
   "lifenote": {
     "addItem": "Add",
+    "subscriptionPicker": {
+      "title": "Select a service",
+      "selectFromPreset": "Select from presets",
+      "categories": {
+        "video": "Video",
+        "music": "Music",
+        "shopping": "Shopping",
+        "mobile": "Mobile",
+        "broadcast": "Broadcast",
+        "other": "Other"
+      }
+    },
     "categories": {
       "life_profile": "Basic Info",
       "life_medical": "Medical",

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { SubscriptionPicker, getExistingServiceNames } from "@/components/notebook/SubscriptionPicker";
 import type { Json } from "@/types/database";
 import type { LifeNoteTemplate, LifeNoteBody, FieldDefinition } from "@/types/notes";
 
@@ -147,6 +149,8 @@ function RepeatableField({
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const subFields = field.fields!;
+  const isSubscription = field.key === "subscriptions";
+  const [showPresetPicker, setShowPresetPicker] = useState(false);
 
   function addItem() {
     const empty: Record<string, string> = {};
@@ -154,6 +158,14 @@ function RepeatableField({
       empty[sf.key] = "";
     }
     onChange([...items, empty]);
+  }
+
+  function addPresetItem(serviceName: string) {
+    const newItem: Record<string, string> = {};
+    for (const sf of subFields) {
+      newItem[sf.key] = sf.key === "service" ? serviceName : "";
+    }
+    onChange([...items, newItem]);
   }
 
   function removeItem(index: number) {
@@ -239,6 +251,26 @@ function RepeatableField({
           </Card>
         );
       })}
+
+      {isSubscription && (
+        <TouchableOpacity
+          style={[styles.addButton, { borderColor: colors.textSecondary }]}
+          onPress={() => setShowPresetPicker(!showPresetPicker)}
+        >
+          <Ionicons name="list-outline" size={20} color={colors.textSecondary} />
+          <Text style={[styles.addButtonText, { color: colors.textSecondary }]}>
+            {t("lifenote.subscriptionPicker.selectFromPreset", "プリセットから選択")}
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {isSubscription && showPresetPicker && (
+        <SubscriptionPicker
+          existingServices={getExistingServiceNames(items)}
+          onSelect={(name) => addPresetItem(name)}
+          onClose={() => setShowPresetPicker(false)}
+        />
+      )}
 
       <TouchableOpacity
         style={[styles.addButton, { borderColor: colors.primary }]}

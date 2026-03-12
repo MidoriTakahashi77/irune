@@ -193,6 +193,18 @@
   },
   "lifenote": {
     "addItem": "追加する",
+    "subscriptionPicker": {
+      "title": "サービスを選択",
+      "selectFromPreset": "プリセットから選択",
+      "categories": {
+        "video": "動画",
+        "music": "音楽",
+        "shopping": "ショッピング",
+        "mobile": "通信",
+        "broadcast": "放送",
+        "other": "その他"
+      }
+    },
     "categories": {
       "life_profile": "基本情報",
       "life_medical": "医療情報",
