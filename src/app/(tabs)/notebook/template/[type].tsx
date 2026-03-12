@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
-import { useUpsertNote } from "@/hooks/useNotes";
+import { useNotes, useUpsertNote } from "@/hooks/useNotes";
 import { supabase } from "@/lib/supabase";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
 import { getTemplateByType } from "@/constants/lifenote-templates";
@@ -24,7 +24,16 @@ export default function TemplateFormScreen() {
 
   const template = getTemplateByType(type ?? "");
   const upsertNote = useUpsertNote();
+  const { data: notes = [] } = useNotes(profile?.family_id);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
   const [values, setValues] = useState<LifeNoteBody>({});
+
+  const birthYear = (() => {
+    const profileNote = notes.find((n: any) => n.note_type === "life_profile");
+    const bd = (profileNote?.body as LifeNoteBody | null)?.birth_date as string | undefined;
+    return bd ? new Date(bd).getFullYear() : undefined;
+  })();
 
   function handleChange(key: string, value: Json) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -86,13 +95,23 @@ export default function TemplateFormScreen() {
       </View>
 
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
       >
         <TemplateFormRenderer
           template={template}
           values={values}
           onChange={handleChange}
+          birthYear={birthYear}
+          scrollBy={(amount) => {
+            scrollViewRef.current?.scrollTo({
+              y: scrollOffsetRef.current + amount,
+              animated: true,
+            });
+          }}
         />
       </ScrollView>
     </SafeAreaView>
