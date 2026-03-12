@@ -17,6 +17,8 @@ export function FAB({ onPress, icon = "add" }: FABProps) {
       style={[styles.fab, { backgroundColor: colors.primary }]}
       onPress={onPress}
       activeOpacity={0.8}
+      accessibilityLabel="fab"
+      testID="fab"
     >
       <Ionicons name={icon} size={28} color="#FFFFFF" />
     </TouchableOpacity>

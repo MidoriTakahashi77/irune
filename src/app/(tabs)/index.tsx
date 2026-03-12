@@ -4,7 +4,9 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
+import { useFamily } from "@/hooks/useFamily";
 import { ScheduleList } from "@/components/calendar/ScheduleList";
+import { MemberAvatarList } from "@/components/family/MemberAvatarList";
 import { Button } from "@/components/ui/Button";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -28,8 +30,14 @@ export default function HomeScreen() {
     todayEnd
   );
 
+  const { data: members = [] } = useFamily(profile?.family_id);
+
   function handleEventPress(event: EventRow) {
     router.push(`/(tabs)/calendar/edit-event/${event.id}`);
+  }
+
+  function handleMemberPress(id: string) {
+    router.push(`/family/${id}`);
   }
 
   return (
@@ -50,6 +58,11 @@ export default function HomeScreen() {
             textStyle={{ fontSize: FontSize.sm }}
           />
         </View>
+
+        <MemberAvatarList
+          members={members}
+          onPress={handleMemberPress}
+        />
 
         <ScheduleList
           events={events}

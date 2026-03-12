@@ -26,7 +26,7 @@ export async function fetchFamily(familyId: string) {
 export async function fetchFamilyMembers(familyId: string) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select("*, member_details(*)")
     .eq("family_id", familyId);
 
   if (error) throw error;

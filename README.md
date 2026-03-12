@@ -103,11 +103,23 @@ src/
 
 ## DBスキーマ
 
-マイグレーションファイル: `supabase/migrations/00001_initial_schema.sql`
+マイグレーションファイル: `supabase/migrations/` (00001〜00004)
 
-主要テーブル: families, profiles, events, diary_entries, diary_media, notes, emergency_contacts
+主要テーブル: families, profiles, events, diary_entries, diary_media, notes, notebook_pages, emergency_contacts, member_details
 
 RLSにより全データが family_id 単位で分離される。
+
+### マイグレーション適用
+
+```bash
+# ローカル: 未適用のマイグレーションを差分適用
+supabase migration up
+
+# リモート (Supabase Cloud): 未適用のマイグレーションを差分適用
+supabase db push
+```
+
+> **注意**: `supabase db reset` はDBを全削除して再構築するため、データが消える。開発環境でも通常は `migration up` または `db push` を使うこと。
 
 ## E2Eテスト
 
