@@ -210,7 +210,7 @@ function DateField({
       </TouchableOpacity>
       {showPicker && (
         <DateTimePicker
-          value={currentDate ?? new Date(1950, 0, 1)}
+          value={currentDate ?? new Date(1990, 0, 1)}
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
           locale="ja"
