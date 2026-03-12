@@ -10,6 +10,7 @@ export const LIFE_NOTE_TEMPLATES: LifeNoteTemplate[] = [
         titleKey: "lifenote.sections.basicInfo",
         descriptionKey: "lifenote.descriptions.basicInfo",
         fields: [
+          { key: "display_name", labelKey: "lifenote.fields.displayName", type: "text", placeholderKey: "lifenote.placeholders.displayName" },
           { key: "full_name", labelKey: "lifenote.fields.fullName", type: "text", placeholderKey: "lifenote.placeholders.fullName" },
           { key: "full_name_kana", labelKey: "lifenote.fields.fullNameKana", type: "text", placeholderKey: "lifenote.placeholders.fullNameKana" },
           { key: "birth_date", labelKey: "lifenote.fields.birthDate", type: "date", placeholderKey: "lifenote.placeholders.birthDate" },

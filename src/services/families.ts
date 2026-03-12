@@ -1,4 +1,3 @@
-import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabase";
 
 export async function createFamily(name: string) {
@@ -35,18 +34,15 @@ export async function fetchFamilyMembers(familyId: string) {
 
 export async function sendFamilyInvite(
   email: string,
-  familyId: string
+  familyId: string,
+  inviterName?: string
 ) {
-  const redirectTo = Linking.createURL(`/invite`, {
-    queryParams: { family_id: familyId },
-  });
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: redirectTo },
+  const { data, error } = await supabase.functions.invoke("send-invite", {
+    body: { email, familyId, inviterName },
   });
 
   if (error) throw error;
+  if (data?.error) throw new Error(data.error);
 }
 
 const CHILD_COLORS = [

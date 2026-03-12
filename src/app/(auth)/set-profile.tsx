@@ -24,7 +24,7 @@ import {
 export default function SetProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { setupProfile, pendingFamilyId } = useAuth();
+  const { profile, setupProfile, pendingFamilyId } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const [loading, setLoading] = useState(false);
@@ -46,6 +46,8 @@ export default function SetProfileScreen() {
       await setupProfile(data.displayName);
       if (pendingFamilyId) {
         router.replace("/(auth)/join-family");
+      } else if (profile?.family_id) {
+        router.replace("/(tabs)");
       } else {
         router.replace("/(auth)/create-family");
       }

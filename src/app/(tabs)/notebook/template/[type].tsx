@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useUpsertNote } from "@/hooks/useNotes";
+import { supabase } from "@/lib/supabase";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
 import { getTemplateByType } from "@/constants/lifenote-templates";
 import { Button } from "@/components/ui/Button";
@@ -33,6 +34,14 @@ export default function TemplateFormScreen() {
     if (!template || !profile?.family_id) return;
 
     const title = t(template.titleKey);
+
+    // life_profile の場合、display_name をプロフィールにも反映
+    if (template.type === "life_profile" && values.display_name) {
+      await supabase
+        .from("profiles")
+        .update({ display_name: values.display_name as string })
+        .eq("id", profile.id);
+    }
 
     await upsertNote.mutateAsync({
       family_id: profile.family_id,
