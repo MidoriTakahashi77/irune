@@ -225,7 +225,18 @@ function DateField({
               : ""}
         </Text>
       </TouchableOpacity>
-      {showPicker && (
+      {showPicker && Platform.OS === "web" && (
+        <input
+          type="date"
+          value={value}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={(e) => {
+            if (e.target.value) onChange(e.target.value);
+          }}
+          style={{ fontSize: 16, padding: 8, marginTop: 8 }}
+        />
+      )}
+      {showPicker && Platform.OS !== "web" && (
         <DateTimePicker
           value={currentDate ?? new Date(1990, 0, 1)}
           mode="date"
