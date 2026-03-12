@@ -459,6 +459,41 @@
       "delete": "Delete",
       "memorialize": "Memorialize",
       "leave": "Leave as is"
+    },
+    "wizard": {
+      "stepOf": "{{current}} / {{total}}",
+      "skip": "Skip to free input",
+      "care": {
+        "q1": "Where would you like to live?",
+        "home": "At home as long as possible",
+        "facility": "In a care facility",
+        "undecided": "Haven't decided yet",
+        "q2": "What matters most in your care?",
+        "independence": "Maintaining independence",
+        "safety": "Safety and security first",
+        "familyBurden": "Reducing burden on family",
+        "q3": "Do you have a care certification?",
+        "certified": "Yes, I do",
+        "notCertified": "No, I don't",
+        "dontKnow": "I'm not sure"
+      },
+      "funeral": {
+        "q1": "What type of funeral do you prefer?",
+        "religious": "Religious ceremony",
+        "secular": "Secular ceremony",
+        "familyOnly": "Family only",
+        "noFuneral": "No funeral needed",
+        "q2": "About burial / remains",
+        "grave": "Traditional grave",
+        "treeBurial": "Tree burial",
+        "seaScattering": "Sea scattering",
+        "undecided": "Haven't decided yet",
+        "q3": "Budget range?",
+        "minimal": "Keep costs minimal",
+        "standard": "Standard range",
+        "generous": "A proper ceremony",
+        "undecidedBudget": "Haven't decided yet"
+      }
     }
   }
 }
