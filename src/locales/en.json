@@ -149,7 +149,9 @@
     "registerEmailPlaceholder": "Enter your email",
     "registerSent": "Verification email sent to {{email}}. Tap the link in the email to activate your account.",
     "guestMode": "Using as guest",
-    "registerPrompt": "Register with email to invite family members and keep your data safe."
+    "registerPrompt": "Register with email to invite family members and keep your data safe.",
+    "displayName": "Display Name",
+    "nameSaved": "Saved"
   },
   "notebook": {
     "lifenote": "Life Note",
@@ -240,6 +242,7 @@
       "historyInfo": "Look back on your life and record your memories. A gift for your family."
     },
     "fields": {
+      "displayName": "Display Name",
       "fullName": "Full Name",
       "fullNameKana": "Name (Kana)",
       "birthDate": "Date of Birth",
@@ -343,6 +346,7 @@
       "lessons": "Life Lessons"
     },
     "placeholders": {
+      "displayName": "e.g. Taro (name shown in the app)",
       "fullName": "e.g. John Doe",
       "fullNameKana": "e.g. Kana reading",
       "birthDate": "e.g. 1950-04-01",

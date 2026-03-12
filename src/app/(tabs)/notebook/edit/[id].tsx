@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
 import { getTemplateByType } from "@/constants/lifenote-templates";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -17,6 +19,7 @@ export default function EditNoteScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { profile } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
 
@@ -47,6 +50,14 @@ export default function EditNoteScreen() {
     if (!title.trim()) {
       Alert.alert(t("notebook.titleRequired"));
       return;
+    }
+
+    // life_profile の場合、display_name をプロフィールにも反映
+    if (note.note_type === "life_profile" && bodyValues.display_name && profile) {
+      await supabase
+        .from("profiles")
+        .update({ display_name: bodyValues.display_name as string })
+        .eq("id", profile.id);
     }
 
     await upsertNote.mutateAsync({

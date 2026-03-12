@@ -149,7 +149,9 @@
     "registerEmailPlaceholder": "メールアドレスを入力",
     "registerSent": "{{email}} に確認メールを送信しました。メールのリンクをタップしてアカウントを有効化してください。",
     "guestMode": "ゲストモードで利用中",
-    "registerPrompt": "メールアドレスを登録すると、家族を招待したりデータを安全に保護できます。"
+    "registerPrompt": "メールアドレスを登録すると、家族を招待したりデータを安全に保護できます。",
+    "displayName": "表示名",
+    "nameSaved": "保存しました"
   },
   "notebook": {
     "lifenote": "ライフノート",
@@ -240,6 +242,7 @@
       "historyInfo": "あなたの人生を振り返り、思い出を記録しましょう。家族への贈り物になります。"
     },
     "fields": {
+      "displayName": "表示名",
       "fullName": "氏名",
       "fullNameKana": "ふりがな",
       "birthDate": "生年月日",
@@ -343,6 +346,7 @@
       "lessons": "人生で学んだこと"
     },
     "placeholders": {
+      "displayName": "例: たろう（アプリ内で表示される名前）",
       "fullName": "例: 山田 太郎",
       "fullNameKana": "例: やまだ たろう",
       "birthDate": "例: 1950-04-01",
