@@ -13,12 +13,14 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  birthYear?: number;
 }
 
 export function TemplateFormRenderer({
   template,
   values,
   onChange,
+  birthYear,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -42,6 +44,7 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
+              birthYear={birthYear}
             />
           ))}
         </View>
@@ -54,10 +57,12 @@ function FieldRenderer({
   field,
   values,
   onChange,
+  birthYear,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  birthYear?: number;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -122,6 +127,7 @@ function FieldRenderer({
           field={field}
           items={items}
           onChange={(items) => onChange(field.key, items)}
+          birthYear={hasTimelineFields ? birthYear : undefined}
         />
       </>
     );
@@ -147,10 +153,12 @@ function RepeatableField({
   field,
   items,
   onChange,
+  birthYear,
 }: {
   field: FieldDefinition;
   items: Json[];
   onChange: (items: Json[]) => void;
+  birthYear?: number;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -172,7 +180,19 @@ function RepeatableField({
   function updateItem(index: number, subKey: string, value: Json) {
     const updated = items.map((item, i) => {
       if (i !== index) return item;
-      return { ...(item as Record<string, Json>), [subKey]: value };
+      const record = { ...(item as Record<string, Json>), [subKey]: value };
+      // 生年月日から年↔年齢を自動計算
+      if (birthYear && (subKey === "year" || subKey === "age")) {
+        const num = parseInt(value as string, 10);
+        if (!isNaN(num)) {
+          if (subKey === "year") {
+            record.age = String(num - birthYear);
+          } else {
+            record.year = String(birthYear + num);
+          }
+        }
+      }
+      return record;
     });
     onChange(updated);
   }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useNote, useUpsertNote } from "@/hooks/useNotes";
+import { useNote, useNotes, useUpsertNote } from "@/hooks/useNotes";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { TemplateFormRenderer } from "@/components/notebook/TemplateFormRenderer";
@@ -25,6 +25,13 @@ export default function EditNoteScreen() {
 
   const { data: note, isLoading } = useNote(id);
   const upsertNote = useUpsertNote();
+  const { data: notes = [] } = useNotes(profile?.family_id);
+
+  const birthYear = (() => {
+    const profileNote = notes.find((n: any) => n.note_type === "life_profile");
+    const bd = (profileNote?.body as LifeNoteBody | null)?.birth_date as string | undefined;
+    return bd ? new Date(bd).getFullYear() : undefined;
+  })();
 
   const [title, setTitle] = useState("");
   const [bodyValues, setBodyValues] = useState<LifeNoteBody>({});
@@ -116,6 +123,7 @@ export default function EditNoteScreen() {
             template={template}
             values={bodyValues}
             onChange={handleFieldChange}
+            birthYear={birthYear}
           />
         )}
       </ScrollView>
