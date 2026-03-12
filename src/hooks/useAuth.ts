@@ -125,10 +125,10 @@ export function useAuth() {
       Platform.OS === "web"
         ? `${window.location.origin}/auth-callback`
         : "irune:///auth-callback";
-    const { error } = await supabase.auth.updateUser({
-      email,
-      options: { emailRedirectTo },
-    });
+    const { error } = await supabase.auth.updateUser(
+      { email },
+      { emailRedirectTo }
+    );
     if (error) throw error;
   }
 
