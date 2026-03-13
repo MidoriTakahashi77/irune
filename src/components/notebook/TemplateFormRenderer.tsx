@@ -13,12 +13,14 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  onSave?: () => void;
 }
 
 export function TemplateFormRenderer({
   template,
   values,
   onChange,
+  onSave,
 }: TemplateFormRendererProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -42,6 +44,7 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
+              onSave={onSave}
             />
           ))}
         </View>
@@ -54,10 +57,12 @@ function FieldRenderer({
   field,
   values,
   onChange,
+  onSave,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  onSave?: () => void;
 }) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
@@ -114,8 +119,10 @@ function FieldRenderer({
       <LetterList
         items={(values[field.key] as Json[] | undefined) ?? []}
         onChange={(items) => onChange(field.key, items)}
+        onSave={onSave ?? (() => {})}
         label={t(field.labelKey)}
         addLabel={t("lifenote.addLetter", "手紙を書く")}
+        saveLabel={t("lifenote.saveLetter", "この手紙を保存")}
         recipientLabel={t("lifenote.fields.recipientName")}
         relationshipLabel={t("lifenote.fields.recipientRelation")}
         messageLabel={t("lifenote.fields.letterMessage")}

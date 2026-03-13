@@ -15,8 +15,10 @@ interface LetterItem {
 interface LetterListProps {
   items: Json[];
   onChange: (items: Json[]) => void;
+  onSave: () => void;
   label: string;
   addLabel: string;
+  saveLabel: string;
   recipientLabel: string;
   relationshipLabel: string;
   messageLabel: string;
@@ -29,8 +31,10 @@ interface LetterListProps {
 export function LetterList({
   items,
   onChange,
+  onSave,
   label,
   addLabel,
+  saveLabel,
   recipientLabel,
   relationshipLabel,
   messageLabel,
@@ -43,8 +47,11 @@ export function LetterList({
   const colors = Colors[scheme];
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const bgColor = scheme === "light" ? "#FFFEF5" : "#2A2820";
+  const paperBg = scheme === "light" ? "#FFFEF5" : "#2A2820";
   const lineColor = scheme === "light" ? "#E8E4D4" : "#3A3830";
+  const envelopeBg = scheme === "light" ? "#FAF8F2" : "#252320";
+  const envelopeBorder = scheme === "light" ? "#D4C9A8" : "#4A4538";
+  const stampColor = scheme === "light" ? "#C4735B" : "#A85D48";
 
   function addItem() {
     const newIndex = items.length;
@@ -55,6 +62,11 @@ export function LetterList({
   function removeItem(index: number) {
     onChange(items.filter((_, i) => i !== index));
     setEditingIndex(null);
+  }
+
+  function saveLetter() {
+    setEditingIndex(null);
+    onSave();
   }
 
   function updateField(index: number, key: string, value: string) {
@@ -83,22 +95,8 @@ export function LetterList({
           return (
             <View
               key={index}
-              style={[styles.editCard, { backgroundColor: bgColor, borderColor: colors.primary }]}
+              style={[styles.editCard, { backgroundColor: paperBg, borderColor: colors.primary }]}
             >
-              <View style={styles.editHeader}>
-                <TouchableOpacity
-                  onPress={() => setEditingIndex(null)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => removeItem(index)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="trash-outline" size={20} color={colors.error} />
-                </TouchableOpacity>
-              </View>
               <View style={styles.toRow}>
                 <Text style={[styles.toLabel, { color: colors.textSecondary }]}>To:</Text>
                 <View style={styles.toInputs}>
@@ -125,37 +123,51 @@ export function LetterList({
                 multiline
                 style={{ minHeight: 120, textAlignVertical: "top" }}
               />
+              <View style={styles.editFooter}>
+                <TouchableOpacity
+                  onPress={() => removeItem(index)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.deleteButton}
+                >
+                  <Ionicons name="trash-outline" size={18} color={colors.error} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={saveLetter}
+                  style={[styles.saveButton, { backgroundColor: colors.primary }]}
+                >
+                  <Text style={styles.saveButtonText}>{saveLabel}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           );
         }
 
-        // 表示モード：手紙らしいカード
-        const hasContent = record.recipient || record.message;
+        // 封筒モード
         return (
           <TouchableOpacity
             key={index}
             activeOpacity={0.7}
             onPress={() => setEditingIndex(index)}
-            style={[styles.displayCard, { backgroundColor: bgColor, borderColor: lineColor }]}
+            style={[styles.envelope, { backgroundColor: envelopeBg, borderColor: envelopeBorder }]}
           >
-            <View style={styles.displayHeader}>
-              <Text style={[styles.displayTo, { color: colors.textSecondary }]}>To:</Text>
-              <Text style={[styles.displayRecipient, { color: colors.text }]}>
-                {record.recipient || "—"}
-                {record.relationship ? ` (${record.relationship})` : ""}
-              </Text>
-              <Ionicons name="create-outline" size={16} color={colors.textSecondary} />
+            {/* 切手風マーク */}
+            <View style={[styles.stamp, { borderColor: stampColor }]}>
+              <Ionicons name="mail" size={16} color={stampColor} />
             </View>
-            <View style={[styles.separator, { borderColor: lineColor }]} />
-            <Text
-              style={[
-                styles.displayMessage,
-                { color: hasContent ? colors.text : colors.textSecondary },
-              ]}
-              numberOfLines={3}
-            >
-              {record.message || messagePlaceholder || ""}
-            </Text>
+            <View style={styles.envelopeBody}>
+              <Text style={[styles.envelopeTo, { color: colors.textSecondary }]}>To:</Text>
+              <Text style={[styles.envelopeRecipient, { color: colors.text }]}>
+                {record.recipient || "—"}
+              </Text>
+              {record.relationship ? (
+                <Text style={[styles.envelopeRelation, { color: colors.textSecondary }]}>
+                  {record.relationship}
+                </Text>
+              ) : null}
+            </View>
+            {record.message ? (
+              <Ionicons name="document-text-outline" size={16} color={colors.textSecondary} />
+            ) : null}
           </TouchableOpacity>
         );
       })}
@@ -185,41 +197,46 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: Spacing.md,
   },
-  displayCard: {
-    borderRadius: 12,
+  // 封筒カード
+  envelope: {
+    borderRadius: 10,
     borderWidth: 1,
-    padding: Spacing.md,
-    gap: Spacing.sm,
-  },
-  displayHeader: {
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
-  displayTo: {
-    fontSize: FontSize.md,
-    fontWeight: "600",
+  stamp: {
+    width: 32,
+    height: 32,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  envelopeBody: {
+    flex: 1,
+    gap: 2,
+  },
+  envelopeTo: {
+    fontSize: 11,
     fontStyle: "italic",
   },
-  displayRecipient: {
-    flex: 1,
+  envelopeRecipient: {
     fontSize: FontSize.md,
     fontWeight: "600",
   },
-  displayMessage: {
+  envelopeRelation: {
     fontSize: FontSize.sm,
-    lineHeight: 20,
   },
+  // 編集カード
   editCard: {
     borderRadius: 12,
     borderWidth: 2,
     padding: Spacing.md,
     gap: Spacing.sm,
-  },
-  editHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   toRow: {
     flexDirection: "row",
@@ -239,6 +256,25 @@ const styles = StyleSheet.create({
   separator: {
     borderBottomWidth: 1,
     borderStyle: "dashed",
+  },
+  editFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: Spacing.xs,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+  saveButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: FontSize.sm,
+    fontWeight: "600",
   },
   addButton: {
     flexDirection: "row",

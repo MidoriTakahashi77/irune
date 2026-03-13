@@ -116,6 +116,7 @@ export default function EditNoteScreen() {
             template={template}
             values={bodyValues}
             onChange={handleFieldChange}
+            onSave={handleSave}
           />
         )}
       </ScrollView>

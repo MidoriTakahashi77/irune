@@ -93,6 +93,7 @@ export default function TemplateFormScreen() {
           template={template}
           values={values}
           onChange={handleChange}
+          onSave={handleSave}
         />
       </ScrollView>
     </SafeAreaView>
