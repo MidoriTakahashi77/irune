@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import {
   fetchEvents,
@@ -23,7 +23,8 @@ export function useEvents(
     queryFn: () => fetchEvents(familyId!, start, end),
     enabled: !!familyId,
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    gcTime: 1000 * 60 * 60 * 24,
+    placeholderData: keepPreviousData, // 月切り替え時に前回データを即表示
   });
 
   // 前後1ヶ月をプリフェッチ（スクロール時のデータ待ちを解消）

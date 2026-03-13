@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -15,7 +16,7 @@ interface NoteCardProps {
   onPress: () => void;
 }
 
-export function NoteCard({
+export const NoteCard = memo(function NoteCard({
   title,
   noteType,
   createdAt,
@@ -52,7 +53,7 @@ export function NoteCard({
       </Card>
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

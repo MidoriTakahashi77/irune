@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
   fetchNotes,
   fetchNote,
@@ -19,7 +19,8 @@ export function useNotes(familyId: string | null | undefined) {
     queryFn: () => fetchNotes(familyId!),
     enabled: !!familyId,
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    gcTime: 1000 * 60 * 60 * 24,
+    placeholderData: keepPreviousData,
   });
 }
 

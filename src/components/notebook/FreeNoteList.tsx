@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NoteCard } from "./NoteCard";
@@ -18,7 +19,7 @@ interface FreeNoteListProps {
   onPress: (id: string) => void;
 }
 
-export function FreeNoteList({ notes, onPress }: FreeNoteListProps) {
+export const FreeNoteList = memo(function FreeNoteList({ notes, onPress }: FreeNoteListProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
@@ -55,7 +56,7 @@ export function FreeNoteList({ notes, onPress }: FreeNoteListProps) {
       })}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

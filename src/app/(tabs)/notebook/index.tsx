@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -29,17 +30,27 @@ export default function NotebookScreen() {
   const { data: notes = [], isLoading } = useNotes(profile?.family_id);
   const [activeTab, setActiveTab] = useState<Tab>("lifenote");
 
-  function handleLifeNotePress(type: string, existingNoteId?: string) {
-    if (existingNoteId) {
-      router.push(`/(tabs)/notebook/edit/${existingNoteId}`);
-    } else {
-      router.push(`/(tabs)/notebook/template/${type}`);
-    }
-  }
+  const handleLifeNotePress = useCallback(
+    (type: string, existingNoteId?: string) => {
+      if (existingNoteId) {
+        router.push(`/(tabs)/notebook/edit/${existingNoteId}`);
+      } else {
+        router.push(`/(tabs)/notebook/template/${type}`);
+      }
+    },
+    [router]
+  );
 
-  function handleFreeNotePress(id: string) {
-    router.push(`/(tabs)/notebook/${id}`);
-  }
+  const handleFreeNotePress = useCallback(
+    (id: string) => {
+      router.push(`/(tabs)/notebook/${id}`);
+    },
+    [router]
+  );
+
+  const handleNewNote = useCallback(() => {
+    router.push("/(tabs)/notebook/new");
+  }, [router]);
 
   return (
     <SafeAreaView
@@ -105,9 +116,7 @@ export default function NotebookScreen() {
       <ScrollView style={styles.content}>
         {isLoading ? (
           <View style={styles.center}>
-            <Text style={{ color: colors.textSecondary }}>
-              {t("common.loading")}
-            </Text>
+            <ActivityIndicator size="small" color={colors.primary} />
           </View>
         ) : activeTab === "lifenote" ? (
           <LifeNoteGrid notes={notes} onPress={handleLifeNotePress} />
@@ -117,10 +126,7 @@ export default function NotebookScreen() {
       </ScrollView>
 
       {activeTab === "free" && (
-        <FAB
-          icon="add"
-          onPress={() => router.push("/(tabs)/notebook/new")}
-        />
+        <FAB icon="add" onPress={handleNewNote} />
       )}
     </SafeAreaView>
   );
