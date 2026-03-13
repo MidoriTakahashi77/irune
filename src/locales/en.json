@@ -193,6 +193,8 @@
   },
   "lifenote": {
     "addItem": "Add",
+    "addLetter": "Write a letter",
+    "noLettersYet": "No letters yet. Write your thoughts to someone special.",
     "categories": {
       "life_profile": "Basic Info",
       "life_medical": "Medical",

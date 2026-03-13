@@ -57,10 +57,11 @@ test.describe("手紙メッセージセクション", () => {
     await page.getByText(/メッセージ|Message/).click();
     await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
 
-    // 手紙 repeatable フィールドのラベルが表示される
-    await expect(page.getByText(/手紙|Letters/)).toBeVisible();
+    // 手紙ラベルと空メッセージが表示される
+    await expect(page.getByText(/^手紙$|^Letters$/)).toBeVisible();
+    await expect(page.getByText(/まだ手紙がありません|No letters yet/)).toBeVisible();
     // 追加ボタンが表示される
-    await expect(page.getByText(/追加する|Add/)).toBeVisible();
+    await expect(page.getByText(/手紙を書く|Write a letter/)).toBeVisible();
 
     await page.getByText(/キャンセル|Cancel/).click();
   });
@@ -69,8 +70,8 @@ test.describe("手紙メッセージセクション", () => {
     await page.getByText(/メッセージ|Message/).click();
     await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
 
-    // 追加ボタンをクリック
-    await page.getByText(/追加する|Add/).click();
+    // 手紙を書くボタンをクリック → 編集カードが展開
+    await page.getByText(/手紙を書く|Write a letter/).click();
 
     // 宛名を入力
     const recipientInput = page.getByPlaceholder(/太郎|recipientName/);
@@ -89,12 +90,12 @@ test.describe("手紙メッセージセクション", () => {
     await page.getByText(/キャンセル|Cancel/).click();
   });
 
-  test("手紙を保存後に再度開いてデータが反映されている", async ({ page }) => {
+  test("手紙を保存後に再度開くと手紙カードで表示される", async ({ page }) => {
     await page.getByText(/メッセージ|Message/).click();
     await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
 
-    // 追加して入力
-    await page.getByText(/追加する|Add/).click();
+    // 手紙を追加して入力
+    await page.getByText(/手紙を書く|Write a letter/).click();
     const recipientInput = page.getByPlaceholder(/太郎|recipientName/);
     await expect(recipientInput).toBeVisible({ timeout: 3000 });
     await recipientInput.fill("花子");
@@ -117,8 +118,14 @@ test.describe("手紙メッセージセクション", () => {
     // 再度開いてデータが保持されていることを確認
     await page.getByText(/メッセージ|Message/).click();
     await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
-    // 宛名の入力値が保持されている
-    await expect(page.locator('input[value="花子"]')).toBeVisible({ timeout: 5000 });
+    // 手紙カードの表示モードで宛名が表示されている
+    await expect(page.getByText("花子")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/ずっと感謝しています/)).toBeVisible();
+
+    // タップで編集モードに切り替わる
+    await page.getByText("花子").click();
+    await expect(page.locator('input[value="花子"]')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('input[value="妻"]')).toBeVisible();
   });
 });
 

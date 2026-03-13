@@ -193,6 +193,8 @@
   },
   "lifenote": {
     "addItem": "追加する",
+    "addLetter": "手紙を書く",
+    "noLettersYet": "まだ手紙がありません。大切な人へ想いを書き残しましょう。",
     "categories": {
       "life_profile": "基本情報",
       "life_medical": "医療情報",

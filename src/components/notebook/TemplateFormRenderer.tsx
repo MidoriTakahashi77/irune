@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { LetterList } from "@/components/notebook/LetterCard";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { Json } from "@/types/database";
@@ -105,6 +106,24 @@ function FieldRenderer({
           })}
         </View>
       </View>
+    );
+  }
+
+  if (field.type === "repeatable" && field.key === "letters" && field.fields) {
+    return (
+      <LetterList
+        items={(values[field.key] as Json[] | undefined) ?? []}
+        onChange={(items) => onChange(field.key, items)}
+        label={t(field.labelKey)}
+        addLabel={t("lifenote.addLetter", "手紙を書く")}
+        recipientLabel={t("lifenote.fields.recipientName")}
+        relationshipLabel={t("lifenote.fields.recipientRelation")}
+        messageLabel={t("lifenote.fields.letterMessage")}
+        recipientPlaceholder={t("lifenote.placeholders.recipientName")}
+        relationshipPlaceholder={t("lifenote.placeholders.recipientRelation")}
+        messagePlaceholder={t("lifenote.placeholders.letterMessage")}
+        emptyMessage={t("lifenote.noLettersYet", "まだ手紙がありません。大切な人へ想いを書き残しましょう。")}
+      />
     );
   }
 
