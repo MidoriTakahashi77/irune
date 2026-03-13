@@ -38,6 +38,9 @@ export const SUBSCRIPTION_PRESETS: SubscriptionPreset[] = [
   { name: "楽天市場", category: "shopping" },
   { name: "Yahoo!プレミアム", category: "shopping" },
   // 通信
+  { name: "docomo", category: "mobile" },
+  { name: "au", category: "mobile" },
+  { name: "SoftBank", category: "mobile" },
   { name: "楽天モバイル", category: "mobile" },
   { name: "ahamo", category: "mobile" },
   { name: "LINEMO", category: "mobile" },
