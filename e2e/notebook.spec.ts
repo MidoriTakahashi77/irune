@@ -49,6 +49,80 @@ test("ライフノートのテンプレートフォームを開ける", async ({
 });
 
 // ============================================================
+// 手紙メッセージセクション
+// ============================================================
+
+test.describe("手紙メッセージセクション", () => {
+  test("メッセージテンプレートを開いて手紙フィールドが表示される", async ({ page }) => {
+    await page.getByText(/メッセージ|Message/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+
+    // 手紙 repeatable フィールドのラベルが表示される
+    await expect(page.getByText(/手紙|Letters/)).toBeVisible();
+    // 追加ボタンが表示される
+    await expect(page.getByText(/追加する|Add/)).toBeVisible();
+
+    await page.getByText(/キャンセル|Cancel/).click();
+  });
+
+  test("手紙を追加して宛名・関係・メッセージを入力できる", async ({ page }) => {
+    await page.getByText(/メッセージ|Message/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+
+    // 追加ボタンをクリック
+    await page.getByText(/追加する|Add/).click();
+
+    // 宛名を入力
+    const recipientInput = page.getByPlaceholder(/太郎|recipientName/);
+    await expect(recipientInput).toBeVisible({ timeout: 3000 });
+    await recipientInput.fill("太郎");
+
+    // 関係を入力
+    const relationInput = page.getByPlaceholder(/長男|recipientRelation/);
+    await relationInput.fill("長男");
+
+    // メッセージを入力
+    const messageInput = page.getByPlaceholder(/伝えたいこと/);
+    await messageInput.fill("いつもありがとう");
+
+    await blurActiveInput(page);
+    await page.getByText(/キャンセル|Cancel/).click();
+  });
+
+  test("手紙を保存後に再度開いてデータが反映されている", async ({ page }) => {
+    await page.getByText(/メッセージ|Message/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+
+    // 追加して入力
+    await page.getByText(/追加する|Add/).click();
+    const recipientInput = page.getByPlaceholder(/太郎|recipientName/);
+    await expect(recipientInput).toBeVisible({ timeout: 3000 });
+    await recipientInput.fill("花子");
+
+    const relationInput = page.getByPlaceholder(/長男|recipientRelation/);
+    await relationInput.fill("妻");
+
+    const messageInput = page.getByPlaceholder(/伝えたいこと/);
+    await messageInput.fill("ずっと感謝しています");
+
+    // 保存
+    await blurActiveInput(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+    await page.getByText(/^保存$|^Save$/).click({ force: true });
+
+    await page.waitForTimeout(1000);
+    await expect(page.getByText(/ライフノート|Life Note/)).toBeVisible({ timeout: 15000 });
+
+    // 再度開いてデータが保持されていることを確認
+    await page.getByText(/メッセージ|Message/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+    // 宛名の入力値が保持されている
+    await expect(page.locator('input[value="花子"]')).toBeVisible({ timeout: 5000 });
+  });
+});
+
+// ============================================================
 // ノートブック CRUD テスト（順序依存のため serial）
 // ============================================================
 
