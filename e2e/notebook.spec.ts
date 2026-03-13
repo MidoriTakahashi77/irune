@@ -347,6 +347,82 @@ test.describe.serial("生年月日ピッカー", () => {
 });
 
 // ============================================================
+// サブスクリプションプリセットテスト
+// ============================================================
+
+test.describe("サブスクリプションプリセット", () => {
+  test("契約テンプレートでプリセットピッカーが表示される", async ({ page }) => {
+    await page.getByText(/契約|Contracts/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // プリセットボタンが表示される
+    await expect(page.getByText(/プリセットから選択|Select from presets/)).toBeVisible();
+
+    // プリセットピッカーを開く
+    await page.getByText(/プリセットから選択|Select from presets/).click();
+
+    // カテゴリタブが表示される
+    await expect(page.getByText(/動画|Video/i)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText(/音楽|Music/i)).toBeVisible();
+    await expect(page.getByText(/通信|Mobile/i)).toBeVisible();
+
+    // サービス名が表示される
+    await expect(page.getByText("Netflix")).toBeVisible();
+  });
+
+  test("プリセットからサービスを選択して追加できる", async ({ page }) => {
+    await page.getByText(/契約|Contracts/).click();
+    await expect(page.getByText(/保存|Save/)).toBeVisible({ timeout: 5000 });
+
+    // プリセットピッカーを開く
+    await page.getByText(/プリセットから選択|Select from presets/).click();
+    await expect(page.getByText("Netflix")).toBeVisible({ timeout: 3000 });
+
+    // Netflixを選択
+    await page.getByText("Netflix").click();
+
+    // サービス名がフォームに入力される
+    await expect(page.locator('input[value="Netflix"]')).toBeVisible({ timeout: 3000 });
+
+    // カテゴリを切り替えて別のサービスも追加
+    await page.getByText(/音楽|Music/i).click();
+    await expect(page.getByText("Spotify")).toBeVisible({ timeout: 3000 });
+    await page.getByText("Spotify").click();
+
+    await expect(page.locator('input[value="Spotify"]')).toBeVisible({ timeout: 3000 });
+  });
+
+  test("プリセットで追加後に保存してデータが反映される", async ({ page }) => {
+    await page.getByText(/契約|Contracts/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+
+    // プリセットからNetflixを追加
+    await page.getByText(/プリセットから選択|Select from presets/).click();
+    await expect(page.getByText("Netflix")).toBeVisible({ timeout: 3000 });
+    await page.getByText("Netflix").click();
+    await expect(page.locator('input[value="Netflix"]')).toBeVisible({ timeout: 3000 });
+
+    // 保存
+    await blurActiveInput(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+    await page.getByText(/^保存$|^Save$/).click({ force: true });
+
+    await page.waitForTimeout(1000);
+    await expect(page.getByText(/ライフノート|Life Note/)).toBeVisible({ timeout: 15000 });
+
+    // 再度開いてデータが保持されていることを確認
+    await page.getByText(/契約|Contracts/).click();
+    await expect(page.getByText(/^保存$|^Save$/)).toBeVisible({ timeout: 5000 });
+    // サマリー行にNetflixが表示されていることを確認
+    await expect(page.getByText("Netflix")).toBeVisible({ timeout: 5000 });
+    // タップして展開し、入力値を確認
+    await page.getByText("Netflix").click();
+    await expect(page.locator('input[value="Netflix"]')).toBeVisible({ timeout: 3000 });
+  });
+});
+
+// ============================================================
 // ノートブック CRUD テスト（順序依存のため serial）
 // ============================================================
 

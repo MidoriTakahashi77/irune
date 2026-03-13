@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { TimelineEditor } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { SubscriptionPicker, getExistingServiceNames } from "@/components/notebook/SubscriptionPicker";
 import type { Json } from "@/types/database";
 import type { LifeNoteTemplate, LifeNoteBody, FieldDefinition } from "@/types/notes";
 
@@ -279,6 +280,20 @@ function DateField({
   );
 }
 
+function getItemSummary(record: Record<string, Json>, subFields: FieldDefinition[], t: ReturnType<typeof import("react-i18next").useTranslation>["t"]): string {
+  // Use first non-empty text field as summary
+  for (const sf of subFields) {
+    const val = record[sf.key];
+    if (typeof val === "string" && val.trim()) {
+      if (sf.type === "select" && sf.options) {
+        return t(`lifenote.options.${val}`, val);
+      }
+      return val;
+    }
+  }
+  return "";
+}
+
 function RepeatableField({
   field,
   items,
@@ -292,17 +307,33 @@ function RepeatableField({
   const scheme = useColorScheme();
   const colors = Colors[scheme];
   const subFields = field.fields!;
+  const isSubscription = field.key === "subscriptions";
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showPresetPicker, setShowPresetPicker] = useState(false);
 
   function addItem() {
     const empty: Record<string, string> = {};
     for (const sf of subFields) {
       empty[sf.key] = "";
     }
+    const newIndex = items.length;
     onChange([...items, empty]);
+    setEditingIndex(newIndex);
+  }
+
+  function addPresetItem(serviceName: string) {
+    const newItem: Record<string, string> = {};
+    for (const sf of subFields) {
+      newItem[sf.key] = sf.key === "service" ? serviceName : "";
+    }
+    const newIndex = items.length;
+    onChange([...items, newItem]);
+    setEditingIndex(newIndex);
   }
 
   function removeItem(index: number) {
     onChange(items.filter((_, i) => i !== index));
+    setEditingIndex(null);
   }
 
   function updateItem(index: number, subKey: string, value: Json) {
@@ -321,69 +352,121 @@ function RepeatableField({
 
       {items.map((item, index) => {
         const record = item as Record<string, Json>;
+        const isEditing = editingIndex === index;
+        const summary = getItemSummary(record, subFields, t);
+
         return (
-          <Card key={index} style={styles.repeatableCard}>
-            <View style={styles.repeatableHeader}>
-              <Text style={[styles.repeatableIndex, { color: colors.textSecondary }]}>
+          <View key={index}>
+            <TouchableOpacity
+              style={[
+                styles.summaryRow,
+                {
+                  backgroundColor: colors.backgroundElement,
+                  borderColor: isEditing ? colors.primary : colors.border,
+                  borderWidth: isEditing ? 2 : 1,
+                },
+              ]}
+              activeOpacity={0.6}
+              onPress={() => setEditingIndex(isEditing ? null : index)}
+            >
+              <Text style={[styles.summaryIndex, { color: colors.textSecondary }]}>
                 {index + 1}
               </Text>
-              <TouchableOpacity
-                onPress={() => removeItem(index)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              <Text
+                style={[styles.summaryText, { color: summary ? colors.text : colors.textSecondary }]}
+                numberOfLines={1}
               >
-                <Ionicons name="close-circle" size={22} color={colors.error} />
-              </TouchableOpacity>
-            </View>
-            {subFields.map((sf) => {
-              if (sf.type === "select" && sf.options) {
-                return (
-                  <View key={sf.key} style={styles.subSelectContainer}>
-                    <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
-                      {t(sf.labelKey)}
-                    </Text>
-                    <View style={styles.selectRow}>
-                      {sf.options.map((opt) => {
-                        const selected = record[sf.key] === opt;
-                        return (
-                          <Text
-                            key={opt}
-                            onPress={() => updateItem(index, sf.key, opt)}
-                            style={[
-                              styles.selectOption,
-                              {
-                                backgroundColor: selected ? colors.primary : colors.backgroundElement,
-                                color: selected ? "#FFFFFF" : colors.text,
-                                borderColor: selected ? colors.primary : colors.border,
-                              },
-                            ]}
-                          >
-                            {t(`lifenote.options.${opt}`, opt)}
-                          </Text>
-                        );
-                      })}
-                    </View>
-                  </View>
-                );
-              }
-              return (
-                <Input
-                  key={sf.key}
-                  label={t(sf.labelKey)}
-                  value={(record[sf.key] as string) ?? ""}
-                  onChangeText={(v) => updateItem(index, sf.key, v)}
-                  placeholder={sf.placeholderKey ? t(sf.placeholderKey) : undefined}
-                  multiline={sf.type === "textarea"}
-                  style={
-                    sf.type === "textarea"
-                      ? { minHeight: 60, textAlignVertical: "top" }
-                      : undefined
+                {summary || t("lifenote.tapToEdit", "タップして編集")}
+              </Text>
+              <Ionicons
+                name={isEditing ? "chevron-up" : "chevron-down"}
+                size={16}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+
+            {isEditing && (
+              <Card style={styles.repeatableCard}>
+                <View style={styles.repeatableHeader}>
+                  <TouchableOpacity
+                    onPress={() => removeItem(index)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="trash-outline" size={20} color={colors.error} />
+                  </TouchableOpacity>
+                </View>
+                {subFields.map((sf) => {
+                  if (sf.type === "select" && sf.options) {
+                    return (
+                      <View key={sf.key} style={styles.subSelectContainer}>
+                        <Text style={[styles.selectLabel, { color: colors.textSecondary }]}>
+                          {t(sf.labelKey)}
+                        </Text>
+                        <View style={styles.selectRow}>
+                          {sf.options.map((opt) => {
+                            const selected = record[sf.key] === opt;
+                            return (
+                              <Text
+                                key={opt}
+                                onPress={() => updateItem(index, sf.key, opt)}
+                                style={[
+                                  styles.selectOption,
+                                  {
+                                    backgroundColor: selected ? colors.primary : colors.backgroundElement,
+                                    color: selected ? "#FFFFFF" : colors.text,
+                                    borderColor: selected ? colors.primary : colors.border,
+                                  },
+                                ]}
+                              >
+                                {t(`lifenote.options.${opt}`, opt)}
+                              </Text>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
                   }
-                />
-              );
-            })}
-          </Card>
+                  return (
+                    <Input
+                      key={sf.key}
+                      label={t(sf.labelKey)}
+                      value={(record[sf.key] as string) ?? ""}
+                      onChangeText={(v) => updateItem(index, sf.key, v)}
+                      placeholder={sf.placeholderKey ? t(sf.placeholderKey) : undefined}
+                      multiline={sf.type === "textarea"}
+                      style={
+                        sf.type === "textarea"
+                          ? { minHeight: 60, textAlignVertical: "top" }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
+              </Card>
+            )}
+          </View>
         );
       })}
+
+      {isSubscription && (
+        <TouchableOpacity
+          style={[styles.addButton, { borderColor: colors.textSecondary }]}
+          onPress={() => setShowPresetPicker(!showPresetPicker)}
+        >
+          <Ionicons name="list-outline" size={20} color={colors.textSecondary} />
+          <Text style={[styles.addButtonText, { color: colors.textSecondary }]}>
+            {t("lifenote.subscriptionPicker.selectFromPreset", "プリセットから選択")}
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {isSubscription && showPresetPicker && (
+        <SubscriptionPicker
+          existingServices={getExistingServiceNames(items)}
+          onSelect={(name) => addPresetItem(name)}
+          onClose={() => setShowPresetPicker(false)}
+        />
+      )}
 
       <TouchableOpacity
         style={[styles.addButton, { borderColor: colors.primary }]}
@@ -458,13 +541,27 @@ const styles = StyleSheet.create({
   },
   repeatableHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: Spacing.xs,
   },
-  repeatableIndex: {
+  summaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 12,
+    gap: Spacing.sm,
+  },
+  summaryIndex: {
     fontSize: FontSize.sm,
-    fontWeight: "600",
+    fontWeight: "700",
+    width: 20,
+    textAlign: "center",
+  },
+  summaryText: {
+    flex: 1,
+    fontSize: FontSize.md,
   },
   subSelectContainer: {
     marginBottom: Spacing.xs,
