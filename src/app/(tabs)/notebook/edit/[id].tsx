@@ -130,6 +130,7 @@ export default function EditNoteScreen() {
             template={template}
             values={bodyValues}
             onChange={handleFieldChange}
+            onSave={handleSave}
             birthYear={birthYear}
             scrollBy={(amount) => {
               scrollViewRef.current?.scrollTo({

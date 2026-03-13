@@ -306,9 +306,11 @@ export const LIFE_NOTE_TEMPLATES: LifeNoteTemplate[] = [
         titleKey: "lifenote.sections.messageInfo",
         descriptionKey: "lifenote.descriptions.messageInfo",
         fields: [
-          { key: "to_family", labelKey: "lifenote.fields.toFamily", type: "textarea", placeholderKey: "lifenote.placeholders.toFamily" },
-          { key: "to_friends", labelKey: "lifenote.fields.toFriends", type: "textarea", placeholderKey: "lifenote.placeholders.toFriends" },
-          { key: "gratitude", labelKey: "lifenote.fields.gratitude", type: "textarea", placeholderKey: "lifenote.placeholders.gratitude" },
+          { key: "letters", labelKey: "lifenote.fields.letters", type: "repeatable", fields: [
+            { key: "recipient", labelKey: "lifenote.fields.recipientName", type: "text", placeholderKey: "lifenote.placeholders.recipientName" },
+            { key: "relationship", labelKey: "lifenote.fields.recipientRelation", type: "text", placeholderKey: "lifenote.placeholders.recipientRelation" },
+            { key: "message", labelKey: "lifenote.fields.letterMessage", type: "textarea", placeholderKey: "lifenote.placeholders.letterMessage" },
+          ]},
         ],
       },
     ],

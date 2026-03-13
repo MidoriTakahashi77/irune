@@ -5,6 +5,7 @@ import DateTimePicker, { type DateTimePickerEvent } from "@react-native-communit
 import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { LetterList } from "@/components/notebook/LetterCard";
 import { TimelineEditor } from "@/components/notebook/TimelineView";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -16,6 +17,7 @@ interface TemplateFormRendererProps {
   template: LifeNoteTemplate;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  onSave?: () => void;
   scrollBy?: (amount: number) => void;
   birthYear?: number;
 }
@@ -24,6 +26,7 @@ export function TemplateFormRenderer({
   template,
   values,
   onChange,
+  onSave,
   scrollBy,
   birthYear,
 }: TemplateFormRendererProps) {
@@ -49,6 +52,7 @@ export function TemplateFormRenderer({
               field={field}
               values={values}
               onChange={onChange}
+              onSave={onSave}
               scrollBy={scrollBy}
               birthYear={birthYear}
             />
@@ -63,12 +67,14 @@ function FieldRenderer({
   field,
   values,
   onChange,
+  onSave,
   scrollBy,
   birthYear,
 }: {
   field: FieldDefinition;
   values: LifeNoteBody;
   onChange: (key: string, value: Json) => void;
+  onSave?: () => void;
   scrollBy?: (amount: number) => void;
   birthYear?: number;
 }) {
@@ -119,6 +125,26 @@ function FieldRenderer({
           })}
         </View>
       </View>
+    );
+  }
+
+  if (field.type === "repeatable" && field.key === "letters" && field.fields) {
+    return (
+      <LetterList
+        items={(values[field.key] as Json[] | undefined) ?? []}
+        onChange={(items) => onChange(field.key, items)}
+        onSave={onSave ?? (() => {})}
+        label={t(field.labelKey)}
+        addLabel={t("lifenote.addLetter", "手紙を書く")}
+        saveLabel={t("lifenote.saveLetter", "この手紙を保存")}
+        recipientLabel={t("lifenote.fields.recipientName")}
+        relationshipLabel={t("lifenote.fields.recipientRelation")}
+        messageLabel={t("lifenote.fields.letterMessage")}
+        recipientPlaceholder={t("lifenote.placeholders.recipientName")}
+        relationshipPlaceholder={t("lifenote.placeholders.recipientRelation")}
+        messagePlaceholder={t("lifenote.placeholders.letterMessage")}
+        emptyMessage={t("lifenote.noLettersYet", "まだ手紙がありません。大切な人へ想いを書き残しましょう。")}
+      />
     );
   }
 
