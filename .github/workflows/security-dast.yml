@@ -1,0 +1,57 @@
+name: Security DAST
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: dast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  owasp-zap-dast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Export web bundle
+        run: bunx expo export --platform web
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          EXPO_PUBLIC_SUPABASE_KEY: placeholder
+
+      - name: Serve web app
+        run: |
+          npx serve dist -l 8080 &
+          echo "Waiting for app to start..."
+          timeout 60s bash -c 'until curl -s http://localhost:8080 > /dev/null; do sleep 2; done'
+          echo "App is ready"
+
+      - name: Run OWASP ZAP
+        id: zap_step
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d_%H%M')
+          FILENAME="ZAP_Scanning_Report_${TIMESTAMP}.html"
+          echo "REPORT_NAME=${FILENAME}" >> "$GITHUB_OUTPUT"
+
+          docker run --user root --network host -v "$(pwd):/zap/wrk/:rw" -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://localhost:8080 -g gen.conf -J zap_result.json -r "${FILENAME}" || true
+
+      - name: Upload ZAP Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zap-results
+          path: |
+            zap_result.json
+            ${{ steps.zap_step.outputs.REPORT_NAME }}
