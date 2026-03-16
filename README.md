@@ -151,6 +151,22 @@ src/
 | iOS | Hermes bytecode (.hbc) | 約 7.1 MB |
 | Web | JavaScript (gzip) | 約 1.0 MB |
 
+## Web版セキュリティヘッダー
+
+CSP メタタグは `src/app/+html.tsx` でビルド出力に含まれるため追加設定不要。
+
+HTTPレスポンスヘッダーは `public/_headers` で定義しており、`expo export` 時に `dist/_headers` にコピーされる。Cloudflare Pages はこのファイルを自動的に読み取り、全レスポンスにヘッダーを付与する。
+
+| ヘッダー | 値 | 目的 |
+|----------|-----|------|
+| `X-Content-Type-Options` | `nosniff` | MIMEスニッフィング防止 |
+| `X-Frame-Options` | `DENY` | クリックジャッキング防止 |
+| `Cross-Origin-Opener-Policy` | `same-origin` | クロスオリジン隔離 |
+| `Cross-Origin-Resource-Policy` | `same-origin` | クロスオリジンリソース制限 |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), ...` | 不要なブラウザ機能の無効化 |
+
+検出事項の詳細は `docs/security-issues.md` を参照。
+
 ## DBスキーマ
 
 マイグレーションファイル: `supabase/migrations/` (00001〜00004)
