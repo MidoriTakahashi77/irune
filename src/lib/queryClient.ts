@@ -9,7 +9,7 @@ export const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 60 * 24, // 24 hours (永続化に合わせて延長)
       retry: 1,
       retryDelay: 1000,
-      refetchOnWindowFocus: false, // バッテリー節約: バックグラウンド復帰時のrefetch無効
+      refetchOnWindowFocus: true, // focusManager連携: フォアグラウンド復帰時にstaleデータのみ再取得
     },
   },
 });

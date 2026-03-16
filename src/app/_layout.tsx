@@ -10,7 +10,11 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { queryClient, fileSystemPersister } from "@/lib/queryClient";
+import { setupNetworkHandlers } from "@/lib/network";
 import "@/lib/i18n";
+
+// オフライン検知・フォアグラウンド復帰連携を初期化
+setupNetworkHandlers();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
