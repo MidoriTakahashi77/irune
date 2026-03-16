@@ -32,6 +32,7 @@ jobs:
 
       - name: Serve web app
         run: |
+          cp serve.json dist/serve.json
           npx serve dist -l 8080 &
           echo "Waiting for app to start..."
           timeout 60s bash -c 'until curl -s http://localhost:8080 > /dev/null; do sleep 2; done'
