@@ -8,7 +8,7 @@
 - **バックエンド**: Supabase (Auth / PostgreSQL / Realtime / Storage)
 - **状態管理**: TanStack Query v5 + Zustand
 - **フォーム**: React Hook Form + Zod v3
-- **カレンダー**: react-native-calendars (Wix)
+- **カレンダー**: カスタム calendar-kit (FlatList ベース)
 - **i18n**: i18next (日本語デフォルト)
 - **パッケージマネージャー**: bun
 
@@ -100,6 +100,56 @@ src/
 ├── locales/              # ja.json, en.json
 └── utils/                # date.ts, validation.ts
 ```
+
+## パフォーマンス最適化
+
+### オフライン対応・省電力設計
+
+災害時でも家族情報・緊急連絡先・カレンダーを閲覧できるよう、ネットワーク非依存かつ省電力な設計になっている。
+
+#### データ永続化
+
+- TanStack Query のキャッシュを `expo-file-system` で端末に永続化 (`src/lib/queryClient.ts`)
+- アプリ再起動時もローカルキャッシュから即座にデータを表示し、バックグラウンドで Supabase と同期
+- キャッシュ有効期限: 24 時間 (`gcTime`)、stale 判定: 5 分 (`staleTime`)
+- Web 環境ではメモリキャッシュのみ（`PersistQueryClientProvider` / `QueryClientProvider` を自動切替）
+
+#### ネットワーク状態連携
+
+`expo-network` と TanStack Query の `onlineManager` / `focusManager` を連携 (`src/lib/network.ts`):
+
+| 状態 | 動作 |
+|------|------|
+| オフライン | クエリ発行を自動停止、ローカルキャッシュのみで動作 |
+| オンライン復帰 | キューに溜まったクエリを自動再実行 |
+| フォアグラウンド復帰 | stale データのみ再取得 |
+| バックグラウンド | ネットワークリクエスト完全停止 |
+
+#### Supabase 認証トークンの省電力管理
+
+`autoRefreshToken: false` に設定し、バックグラウンドでのタイマーを排除 (`src/lib/supabase.ts`):
+
+- フォアグラウンド復帰時: `supabase.auth.startAutoRefresh()` でトークン更新開始
+- バックグラウンド移行時: `supabase.auth.stopAutoRefresh()` でトークン更新停止
+
+#### カレンダー表示の高速化
+
+- `keepPreviousData` により月切り替え時もフェッチ完了まで前回データを即表示（空白なし）
+- 前後 1 ヶ月のプリフェッチで、スクロール時のデータ待ちを解消
+- カスタム calendar-kit は FlatList ベースで `windowSize=3` の仮想化描画
+
+#### コンポーネント最適化
+
+- カレンダー系: `DayCell`, `ScheduleCard`, `MonthView`, `TabBar` を `React.memo` 化
+- ノート系: `LifeNoteGrid`, `FreeNoteList`, `NoteCard` を `React.memo` 化
+- イベントハンドラは `useCallback` で参照安定化し、memo コンポーネントの無駄な再描画を防止
+
+### ビルドサイズ
+
+| プラットフォーム | バンドル形式 | サイズ |
+|-----------------|-------------|--------|
+| iOS | Hermes bytecode (.hbc) | 約 7.1 MB |
+| Web | JavaScript (gzip) | 約 1.0 MB |
 
 ## DBスキーマ
 
