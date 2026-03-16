@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -11,7 +12,7 @@ interface LifeNoteGridProps {
   onPress: (type: string, existingNoteId?: string) => void;
 }
 
-export function LifeNoteGrid({ notes, onPress }: LifeNoteGridProps) {
+export const LifeNoteGrid = memo(function LifeNoteGrid({ notes, onPress }: LifeNoteGridProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
@@ -63,7 +64,7 @@ export function LifeNoteGrid({ notes, onPress }: LifeNoteGridProps) {
       })}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   grid: {
