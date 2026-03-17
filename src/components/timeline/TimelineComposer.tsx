@@ -83,8 +83,8 @@ export function TimelineComposer({
 
   const handleSubmit = useCallback(() => {
     if (!text.trim() || !user || !profile?.family_id) return;
-    createPost.mutate(
-      {
+    createPost.mutate({
+      post: {
         family_id: profile.family_id,
         author_id: user.id,
         type: "post",
@@ -92,14 +92,16 @@ export function TimelineComposer({
         reply_to_id: replyContext?.post.id ?? undefined,
         mentions: mentionIds.length > 0 ? mentionIds : undefined,
       },
-      {
-        onSuccess: () => {
-          setText("");
-          setMentionIds([]);
-          onClearReply?.();
-        },
-      }
-    );
+      profile: {
+        display_name: profile.display_name,
+        color: profile.color,
+      },
+      replyTo: replyContext?.post ?? null,
+    });
+    // 楽観的更新で即表示されるので入力をすぐクリア
+    setText("");
+    setMentionIds([]);
+    onClearReply?.();
   }, [text, user, profile, createPost, replyContext, mentionIds, onClearReply]);
 
   const replyPost = replyContext?.post;

@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuth } from "@/hooks/useAuth";
-import { useDeletePost } from "@/hooks/useTimeline";
+import { useDeletePost, useRetryPost } from "@/hooks/useTimeline";
 import type { TimelinePostWithDetails, ProfileRow } from "@/types/events";
 
 // 自分のバブル色
@@ -91,8 +91,11 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
   const colors = Colors[scheme];
   const { user } = useAuth();
   const deletePost = useDeletePost();
+  const retryPost = useRetryPost();
 
   const isOwn = user?.id === post.author_id;
+  const isPending = post._optimistic;
+  const isFailed = post._error;
   const authorName = post.profiles?.display_name ?? "?";
   const authorColor = post.profiles?.color ?? "#999999";
   const isActivity = post.type !== "post";
@@ -155,8 +158,12 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
     ]);
   }, [post.id, deletePost, t, isOwn]);
 
+  const handleRetry = useCallback(() => {
+    retryPost(post);
+  }, [retryPost, post]);
+
   return (
-    <View style={s.outerRow}>
+    <View style={[s.outerRow, isPending && s.pending]}>
       <Animated.View style={[s.replyHint, { opacity: replyIconOpacity }]}>
         <Ionicons name="arrow-undo" size={18} color={colors.primary} />
       </Animated.View>
@@ -266,16 +273,21 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
               </View>
             </TouchableOpacity>
 
-            {/* 時間 */}
-            <Text
-              style={[
-                s.time,
-                { color: colors.textSecondary },
-                isOwn ? s.timeOwn : s.timeOther,
-              ]}
-            >
-              {formatTime(post.created_at)}
-            </Text>
+            {/* 時間 / ステータス */}
+            <View style={[s.statusRow, isOwn ? s.statusRowOwn : s.statusRowOther]}>
+              {isFailed ? (
+                <TouchableOpacity onPress={handleRetry} style={s.errorBtn} hitSlop={8}>
+                  <Ionicons name="alert-circle" size={16} color={colors.error} />
+                </TouchableOpacity>
+              ) : isPending ? (
+                <Ionicons name="time-outline" size={13} color={colors.textSecondary} />
+              ) : null}
+              <Text
+                style={[s.time, { color: isFailed ? colors.error : colors.textSecondary }]}
+              >
+                {isFailed ? t("timeline.sendFailed") : formatTime(post.created_at)}
+              </Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -384,17 +396,28 @@ const s = StyleSheet.create({
     marginTop: 2,
     fontWeight: "500",
   },
-  time: {
-    fontSize: 11,
+  pending: {
+    opacity: 0.5,
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
     marginTop: 2,
     marginBottom: 4,
   },
-  timeOwn: {
-    textAlign: "right",
+  statusRowOwn: {
+    justifyContent: "flex-end",
     marginRight: 4,
   },
-  timeOther: {
-    textAlign: "left",
+  statusRowOther: {
+    justifyContent: "flex-start",
     marginLeft: 4,
+  },
+  errorBtn: {
+    padding: 2,
+  },
+  time: {
+    fontSize: 11,
   },
 });

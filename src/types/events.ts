@@ -71,6 +71,10 @@ export type TimelineReplyTo = Pick<
 export type TimelinePostWithDetails = TimelinePostRow & {
   profiles: Pick<ProfileRow, "display_name" | "color"> | null;
   reply_to: TimelineReplyTo | null;
+  /** 楽観的更新中 (未保存) */
+  _optimistic?: boolean;
+  /** 保存失敗 */
+  _error?: boolean;
 };
 
 export type NoteType =

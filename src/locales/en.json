@@ -238,7 +238,8 @@
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "sendFailed": "Failed. Tap to retry"
   },
   "lifenote": {
     "addItem": "Add",

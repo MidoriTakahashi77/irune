@@ -238,7 +238,8 @@
     "hoursAgo": "{{count}}時間前",
     "daysAgo": "{{count}}日前",
     "today": "今日",
-    "yesterday": "昨日"
+    "yesterday": "昨日",
+    "sendFailed": "送信失敗 タップで再試行"
   },
   "lifenote": {
     "addItem": "追加する",
