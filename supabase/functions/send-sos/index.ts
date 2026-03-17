@@ -1,6 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -76,6 +84,7 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+    const safeName = escapeHtml(senderName);
 
     // Send emails to all emergency contacts
     const results = await Promise.allSettled(
@@ -89,7 +98,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: Deno.env.get("RESEND_FROM_EMAIL") ?? "irune <noreply@irune.app>",
             to: [contact.email],
-            subject: `[緊急SOS] ${senderName}さんから緊急連絡です`,
+            subject: `[緊急SOS] ${safeName}さんから緊急連絡です`,
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background: #D32F2F; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -97,10 +106,10 @@ Deno.serve(async (req) => {
                 </div>
                 <div style="padding: 24px; background: #fff; border: 1px solid #eee; border-radius: 0 0 8px 8px;">
                   <p style="font-size: 16px; margin-bottom: 16px;">
-                    <strong>${senderName}</strong>さんが緊急SOSを発信しました。
+                    <strong>${safeName}</strong>さんが緊急SOSを発信しました。
                   </p>
                   <p style="font-size: 14px; color: #666; margin-bottom: 16px;">
-                    送信日時: ${now}
+                    送信日時: ${escapeHtml(now)}
                   </p>
                   <p style="font-size: 14px; color: #666;">
                     すぐに連絡を取ってください。
@@ -113,15 +122,16 @@ Deno.serve(async (req) => {
       )
     );
 
-    const sent = results.filter((r) => r.status === "fulfilled").length;
+    const sent = results.filter((r) => r.status === "fulfilled" && (r.value as Response).ok).length;
 
     return new Response(
       JSON.stringify({ success: true, sent, total: emailContacts.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

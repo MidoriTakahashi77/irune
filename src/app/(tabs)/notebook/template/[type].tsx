@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -35,14 +35,20 @@ export default function TemplateFormScreen() {
 
   // 公開設定の状態
   const existingNote = notes.find((n) => n.note_type === type);
-  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>(
-    existingNote?.is_locked
-      ? (existingNote?.shared_with?.length ? "custom" : "owner")
-      : "all"
-  );
-  const [visibilityIds, setVisibilityIds] = useState<string[]>(
-    existingNote?.shared_with ?? []
-  );
+  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("all");
+  const [visibilityIds, setVisibilityIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!existingNote) return;
+    if (existingNote.is_locked) {
+      const shared = existingNote.shared_with ?? [];
+      setVisibilityMode(shared.length ? "custom" : "owner");
+      setVisibilityIds(shared);
+    } else {
+      setVisibilityMode("all");
+      setVisibilityIds([]);
+    }
+  }, [existingNote?.id, existingNote?.is_locked, existingNote?.shared_with]);
 
   const familyMembers = members
     .filter((m) => m.id !== profile?.id)
