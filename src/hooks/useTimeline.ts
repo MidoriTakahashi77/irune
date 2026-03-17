@@ -141,9 +141,11 @@ export function useCreatePost() {
       return { prev, tempId };
     },
 
-    onSuccess: (serverPost, _vars, context) => {
+    onSuccess: (_serverPost, _vars, context) => {
       if (!context) return;
-      // 仮IDを実データに差し替え
+      // key (id) を変えずに _optimistic フラグだけ落とす
+      // → FlatList の key が変わらないのでチラつかない
+      // 実IDへの差し替えは次回 refetch で自然に行われる
       queryClient.setQueriesData<TimelinePages>(
         { queryKey: ["timeline"] },
         (old) => {
@@ -153,7 +155,7 @@ export function useCreatePost() {
             pages: old.pages.map((page) =>
               page.map((p) =>
                 p.id === context.tempId
-                  ? { ...serverPost, _optimistic: false, _error: false }
+                  ? { ...p, _optimistic: false }
                   : p
               )
             ),
