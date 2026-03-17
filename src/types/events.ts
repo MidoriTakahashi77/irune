@@ -26,12 +26,23 @@ export type MemberDetailInsert =
 export type MemberDetailUpdate =
   Database["public"]["Tables"]["member_details"]["Update"];
 
-export type EmergencyContactRow =
-  Database["public"]["Tables"]["emergency_contacts"]["Row"];
-export type EmergencyContactInsert =
-  Database["public"]["Tables"]["emergency_contacts"]["Insert"];
-export type EmergencyContactUpdate =
-  Database["public"]["Tables"]["emergency_contacts"]["Update"];
+export type TrustedContactRow = {
+  id: string;
+  family_id: string;
+  profile_id: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  relationship: string;
+  type: TrustedContactType;
+  is_sos_target: boolean;
+  created_by: string;
+  created_at: string;
+};
+
+export type TrustedContactInsert = Omit<TrustedContactRow, "id" | "created_at">;
+export type TrustedContactUpdate = Partial<Omit<TrustedContactRow, "id" | "created_at">>;
+export type TrustedContactType = "family" | "friend" | "professional";
 
 export type NotebookPageRow =
   Database["public"]["Tables"]["notebook_pages"]["Row"];
@@ -60,10 +71,16 @@ export type NoteType =
   | "life_message"
   | "life_history";
 
-export type EmergencyContactCategory =
-  | "emergency"
-  | "death_notification"
-  | "professional";
+export type ProfileWithDetails = ProfileRow & {
+  member_details: MemberDetailRow[];
+};
+
+export type NoteWithPageCount = NoteRow & {
+  notebook_pages: { count: number }[];
+};
+
+export type VisibilityMode = "all" | "owner" | "custom";
+
 export type Relationship =
   | "spouse"
   | "father"

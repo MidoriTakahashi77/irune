@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase";
-import type { NoteInsert, NoteUpdate, NotebookPageInsert, NotebookPageUpdate } from "@/types/events";
+import type { NoteInsert, NoteRow, NoteUpdate, NoteWithPageCount, NotebookPageInsert, NotebookPageUpdate } from "@/types/events";
 
 // ── Notes ──
 
-export async function fetchNotes(familyId: string) {
+export async function fetchNotes(familyId: string): Promise<NoteWithPageCount[]> {
   const { data, error } = await supabase
     .from("notes")
     .select("*, notebook_pages(count)")
@@ -11,10 +11,10 @@ export async function fetchNotes(familyId: string) {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data as unknown as NoteWithPageCount[];
 }
 
-export async function fetchNote(id: string) {
+export async function fetchNote(id: string): Promise<NoteRow> {
   const { data, error } = await supabase
     .from("notes")
     .select("*")
@@ -22,7 +22,7 @@ export async function fetchNote(id: string) {
     .single();
 
   if (error) throw error;
-  return data;
+  return data as unknown as NoteRow;
 }
 
 export async function upsertNote(note: NoteInsert & { id?: string }) {
