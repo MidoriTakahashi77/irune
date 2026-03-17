@@ -14,7 +14,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { TimelinePostCard } from "./TimelinePostCard";
 import type { TimelinePostWithDetails, ProfileRow } from "@/types/events";
 
-function dateLabelText(dateStr: string): string {
+function dateLabelText(
+  dateStr: string,
+  t: (key: string) => string
+): string {
   const d = new Date(dateStr);
   const now = new Date();
   const sameDay = (a: Date, b: Date) =>
@@ -22,11 +25,11 @@ function dateLabelText(dateStr: string): string {
     a.getMonth() === b.getMonth() &&
     a.getFullYear() === b.getFullYear();
 
-  if (sameDay(d, now)) return "Today";
+  if (sameDay(d, now)) return t("timeline.today");
 
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (sameDay(d, yesterday)) return "Yesterday";
+  if (sameDay(d, yesterday)) return t("timeline.yesterday");
 
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
@@ -88,6 +91,7 @@ export function TimelineList({
 
   // items: DESC 順 (index 0 = newest = 画面下部)
   // 日付セパレータは各日グループの末尾 (= inverted で上部) に挿入
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t は安定参照
   const items = useMemo(() => {
     const result: ListItem[] = [];
 
@@ -119,7 +123,7 @@ export function TimelineList({
       if (!next || dateKey(next.created_at) !== dateKey(post.created_at)) {
         result.push({
           kind: "date",
-          label: dateLabelText(post.created_at),
+          label: dateLabelText(post.created_at, t),
           key: `date-${dateKey(post.created_at)}`,
         });
       }

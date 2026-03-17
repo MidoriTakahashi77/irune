@@ -100,7 +100,12 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
 
   const bubbleBg = isOwn ? OWN_BUBBLE[scheme] : OTHER_BUBBLE[scheme];
 
-  // スワイプ
+  // スワイプ — ref で最新の props を PanResponder クロージャから参照
+  const onReplyRef = useRef(onReply);
+  onReplyRef.current = onReply;
+  const postRef = useRef(post);
+  postRef.current = post;
+
   const translateX = useRef(new Animated.Value(0)).current;
   const replyIconOpacity = useRef(new Animated.Value(0)).current;
 
@@ -129,7 +134,7 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
         replyIconOpacity.setValue(Math.min(Math.abs(x) / 40, 1));
       },
       onPanResponderRelease: (_e, gs) => {
-        if (gs.dx < SWIPE_THRESHOLD) onReply?.(post);
+        if (gs.dx < SWIPE_THRESHOLD) onReplyRef.current?.(postRef.current);
         resetSwipe();
       },
       onPanResponderTerminate: () => {

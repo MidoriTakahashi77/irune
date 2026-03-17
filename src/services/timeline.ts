@@ -49,11 +49,12 @@ export async function deleteTimelinePost(id: string) {
 
 /** 既読位置の取得 */
 export async function getLastRead(userId: string) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("timeline_reads")
     .select("last_read_at")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
+  if (error) throw error;
   return data?.last_read_at ?? null;
 }
 

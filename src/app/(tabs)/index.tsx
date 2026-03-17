@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
 import { useFamily } from "@/hooks/useFamily";
@@ -34,6 +35,7 @@ const CHAT_BG = {
 } as const;
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile, isAnonymous } = useAuth();
   const scheme = useColorScheme();
@@ -127,7 +129,7 @@ export default function HomeScreen() {
                 </Text>
                 <Text style={[st.scheduleTime, { color: colors.textSecondary }]}>
                   {ev.all_day
-                    ? "All day"
+                    ? t("calendar.allDay")
                     : formatTime(ev.start_at)}
                 </Text>
               </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -69,14 +69,17 @@ export function TimelineComposer({
     [text, mentionIds]
   );
 
-  const filteredMembers =
-    mentionQuery !== null
-      ? members.filter(
-          (m) =>
-            m.id !== user?.id &&
-            m.display_name.toLowerCase().includes(mentionQuery)
-        )
-      : [];
+  const filteredMembers = useMemo(
+    () =>
+      mentionQuery !== null
+        ? members.filter(
+            (m) =>
+              m.id !== user?.id &&
+              m.display_name.toLowerCase().includes(mentionQuery)
+          )
+        : [],
+    [mentionQuery, members, user?.id]
+  );
 
   const handleSubmit = useCallback(() => {
     if (!text.trim() || !user || !profile?.family_id) return;

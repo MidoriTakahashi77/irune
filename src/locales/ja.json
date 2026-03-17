@@ -236,7 +236,9 @@
     "justNow": "たった今",
     "minutesAgo": "{{count}}分前",
     "hoursAgo": "{{count}}時間前",
-    "daysAgo": "{{count}}日前"
+    "daysAgo": "{{count}}日前",
+    "today": "今日",
+    "yesterday": "昨日"
   },
   "lifenote": {
     "addItem": "追加する",

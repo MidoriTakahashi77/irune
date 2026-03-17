@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
 import {
   useInfiniteQuery,
   useQuery,
@@ -39,19 +40,40 @@ export function useLastRead(userId: string | null | undefined) {
   });
 }
 
+/** 画面がバックグラウンドに入る or アンマウント時のみ既読更新 */
 export function useMarkAsRead(
   userId: string | null | undefined,
   familyId: string | null | undefined,
   newestPostAt: string | null
 ) {
   const queryClient = useQueryClient();
+  const latestRef = useRef(newestPostAt);
+  latestRef.current = newestPostAt;
 
   useEffect(() => {
-    if (!userId || !familyId || !newestPostAt) return;
-    updateLastRead(userId, familyId, newestPostAt).then(() => {
-      queryClient.setQueryData(["timeline-last-read", userId], newestPostAt);
+    if (!userId || !familyId) return;
+
+    const flush = () => {
+      const ts = latestRef.current;
+      if (!ts) return;
+      updateLastRead(userId, familyId, ts)
+        .then(() => {
+          queryClient.setQueryData(["timeline-last-read", userId], ts);
+        })
+        .catch(() => {
+          // ネットワークエラー等は無視（次回に再試行される）
+        });
+    };
+
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") flush();
     });
-  }, [userId, familyId, newestPostAt]);
+
+    return () => {
+      sub.remove();
+      flush();
+    };
+  }, [userId, familyId, queryClient]);
 }
 
 export function useCreatePost() {
