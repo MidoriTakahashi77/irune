@@ -268,6 +268,107 @@ export interface Database {
           updated_at?: string;
         };
       };
+      timeline_posts: {
+        Row: {
+          id: string;
+          family_id: string;
+          author_id: string;
+          type: string;
+          body: string | null;
+          ref_id: string | null;
+          ref_summary: string | null;
+          reply_to_id: string | null;
+          mentions: string[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          family_id: string;
+          author_id: string;
+          type?: string;
+          body?: string | null;
+          ref_id?: string | null;
+          ref_summary?: string | null;
+          reply_to_id?: string | null;
+          mentions?: string[];
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          family_id?: string;
+          author_id?: string;
+          type?: string;
+          body?: string | null;
+          ref_id?: string | null;
+          ref_summary?: string | null;
+          reply_to_id?: string | null;
+          mentions?: string[];
+          created_at?: string;
+        };
+      };
+      timeline_comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          author_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          author_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+        };
+      };
+      timeline_reactions: {
+        Row: {
+          id: string;
+          post_id: string;
+          author_id: string;
+          emoji: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          author_id: string;
+          emoji: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          author_id?: string;
+          emoji?: string;
+          created_at?: string;
+        };
+      };
+      timeline_reads: {
+        Row: {
+          user_id: string;
+          family_id: string;
+          last_read_at: string;
+        };
+        Insert: {
+          user_id: string;
+          family_id: string;
+          last_read_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          family_id?: string;
+          last_read_at?: string;
+        };
+      };
       member_details: {
         Row: {
           id: string;

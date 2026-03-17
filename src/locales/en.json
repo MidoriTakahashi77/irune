@@ -223,6 +223,21 @@
     "editDetails": "Edit Member Details",
     "noDetails": "No details registered"
   },
+  "timeline": {
+    "title": "Timeline",
+    "composer": "Share something...",
+    "replyPlaceholder": "Write a reply...",
+    "post": "Post",
+    "noPostsYet": "No posts yet. Share something with your family!",
+    "deleteConfirm": "Delete this post?",
+    "activityEvent": "{{name}} added an event",
+    "activityDiary": "{{name}} wrote a diary entry",
+    "activityNote": "{{name}} updated a note",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
   "lifenote": {
     "addItem": "Add",
     "addLetter": "Write a letter",

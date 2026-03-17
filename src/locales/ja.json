@@ -223,6 +223,21 @@
     "editDetails": "メンバー情報を編集",
     "noDetails": "詳細情報が登録されていません"
   },
+  "timeline": {
+    "title": "タイムライン",
+    "composer": "今なにしてる？",
+    "replyPlaceholder": "返信を書く...",
+    "post": "投稿",
+    "noPostsYet": "まだ投稿がありません。家族に共有してみましょう！",
+    "deleteConfirm": "この投稿を削除しますか？",
+    "activityEvent": "{{name}}が予定を追加しました",
+    "activityDiary": "{{name}}が日記を投稿しました",
+    "activityNote": "{{name}}がノートを更新しました",
+    "justNow": "たった今",
+    "minutesAgo": "{{count}}分前",
+    "hoursAgo": "{{count}}時間前",
+    "daysAgo": "{{count}}日前"
+  },
   "lifenote": {
     "addItem": "追加する",
     "addLetter": "手紙を書く",
