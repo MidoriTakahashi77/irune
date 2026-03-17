@@ -56,9 +56,21 @@ export default function NotebookScreen() {
     <SafeAreaView
       style={[styles.safe, { backgroundColor: colors.background }]}
     >
-      <Text style={[styles.title, { color: colors.text }]}>
-        {t("tabs.notebook")}
-      </Text>
+      <View style={styles.titleRow}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t("tabs.notebook")}
+        </Text>
+        {activeTab === "lifenote" && (
+          <TouchableOpacity
+            style={styles.visibilityButton}
+            onPress={() => router.push("/(tabs)/notebook/visibility")}
+          >
+            <Text style={[styles.visibilityButtonText, { color: colors.primary }]}>
+              {t("visibility.title")}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <View style={styles.tabs}>
         <TouchableOpacity
@@ -134,11 +146,24 @@ export default function NotebookScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingRight: Spacing.lg,
+  },
   title: {
     fontSize: FontSize.xl,
     fontWeight: "bold",
     padding: Spacing.lg,
     paddingBottom: Spacing.sm,
+  },
+  visibilityButton: {
+    padding: Spacing.sm,
+  },
+  visibilityButtonText: {
+    fontSize: FontSize.sm,
+    fontWeight: "500",
   },
   tabs: {
     flexDirection: "row",

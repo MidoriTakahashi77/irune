@@ -8,6 +8,7 @@ export default function NotebookLayout() {
       <Stack.Screen name="[id]" />
       <Stack.Screen name="edit/[id]" />
       <Stack.Screen name="template/[type]" />
+      <Stack.Screen name="visibility" />
     </Stack>
   );
 }

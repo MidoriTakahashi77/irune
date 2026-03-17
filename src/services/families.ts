@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { ProfileWithDetails } from "@/types/events";
 
 export async function createFamily(name: string) {
   const { data, error } = await supabase
@@ -22,14 +23,14 @@ export async function fetchFamily(familyId: string) {
   return data;
 }
 
-export async function fetchFamilyMembers(familyId: string) {
+export async function fetchFamilyMembers(familyId: string): Promise<ProfileWithDetails[]> {
   const { data, error } = await supabase
     .from("profiles")
     .select("*, member_details(*)")
     .eq("family_id", familyId);
 
   if (error) throw error;
-  return data;
+  return data as unknown as ProfileWithDetails[];
 }
 
 export async function sendFamilyInvite(
