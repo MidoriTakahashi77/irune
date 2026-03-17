@@ -1,4 +1,13 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,12 +15,24 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
 import { useFamily } from "@/hooks/useFamily";
-import { ScheduleList } from "@/components/calendar/ScheduleList";
-import { MemberAvatarList } from "@/components/family/MemberAvatarList";
+import {
+  TimelineComposer,
+  type QuoteReplyContext,
+} from "@/components/timeline/TimelineComposer";
+import { TimelineList } from "@/components/timeline/TimelineList";
 import { Colors, Spacing, FontSize } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { toDateString } from "@/utils/date";
-import type { EventRow } from "@/types/events";
+import { toDateString, formatTime } from "@/utils/date";
+import type {
+  EventRow,
+  TimelinePostWithDetails,
+  ProfileRow,
+} from "@/types/events";
+
+const CHAT_BG = {
+  light: "#F7F4F0",
+  dark: "#1A1816",
+} as const;
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -19,6 +40,10 @@ export default function HomeScreen() {
   const { profile, isAnonymous } = useAuth();
   const scheme = useColorScheme();
   const colors = Colors[scheme];
+  const chatBg = CHAT_BG[scheme];
+  const [replyContext, setReplyContext] = useState<QuoteReplyContext | null>(
+    null
+  );
 
   const today = toDateString(new Date());
   const todayStart = `${today}T00:00:00`;
@@ -32,92 +57,163 @@ export default function HomeScreen() {
 
   const { data: members = [] } = useFamily(profile?.family_id);
 
-  function handleEventPress(event: EventRow) {
-    router.push(`/(tabs)/calendar/edit-event/${event.id}`);
-  }
+  const memberMap = useMemo(() => {
+    const map = new Map<string, Pick<ProfileRow, "display_name" | "color">>();
+    for (const m of members) {
+      map.set(m.id, { display_name: m.display_name, color: m.color });
+    }
+    return map;
+  }, [members]);
 
-  function handleMemberPress(id: string) {
-    router.push(`/family/${id}`);
-  }
+  const handleReply = useCallback((post: TimelinePostWithDetails) => {
+    setReplyContext({ post });
+  }, []);
+
+  const handleClearReply = useCallback(() => {
+    setReplyContext(null);
+  }, []);
 
   return (
     <SafeAreaView
-      style={[styles.safe, { backgroundColor: colors.background }]}
+      style={[st.safe, { backgroundColor: colors.background }]}
+      edges={["top"]}
     >
-      <ScrollView>
-        <View style={styles.header}>
-          <Text style={[styles.greeting, { color: colors.text }]}>
-            {profile?.display_name
-              ? `${profile.display_name}さん`
-              : t("tabs.home")}
-          </Text>
-          <View style={styles.headerRight}>
-            {isAnonymous && (
-              <TouchableOpacity
-                onPress={() => router.push("/(auth)/login")}
-                style={[styles.loginButton, { backgroundColor: colors.primary }]}
-              >
-                <Ionicons name="log-in-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.loginText}>{t("auth.login")}</Text>
-              </TouchableOpacity>
-            )}
+      {/* --- 上部ヘッダー (白背景) --- */}
+      <View style={[st.topBar, { borderBottomColor: colors.border }]}>
+        <View style={st.topBarRight}>
+          {isAnonymous && (
             <TouchableOpacity
-              testID="settings-icon"
-              onPress={() => router.push("/settings")}
-              hitSlop={8}
+              onPress={() => router.push("/(auth)/login")}
+              style={[st.iconBtn, { backgroundColor: colors.primary }]}
             >
-              <Ionicons
-                name="settings-outline"
-                size={24}
-                color={colors.textSecondary}
-              />
+              <Ionicons name="log-in-outline" size={15} color="#FFFFFF" />
             </TouchableOpacity>
-          </View>
+          )}
+          <TouchableOpacity
+            testID="settings-icon"
+            onPress={() => router.push("/settings")}
+            hitSlop={8}
+          >
+            <Ionicons
+              name="settings-outline"
+              size={20}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
         </View>
+      </View>
 
-        <MemberAvatarList
+      {/* --- 今日の予定バー (予定があれば表示、別色帯) --- */}
+      {events.length > 0 && (
+        <View style={[st.scheduleBar, { backgroundColor: colors.primaryLight }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={st.scheduleScroll}
+          >
+            {events.map((ev: EventRow) => (
+              <TouchableOpacity
+                key={ev.id}
+                style={st.scheduleChip}
+                onPress={() => router.push("/(tabs)/calendar")}
+                activeOpacity={0.7}
+              >
+                <View
+                  style={[st.scheduleIndicator, { backgroundColor: ev.color || colors.primary }]}
+                />
+                <Text
+                  style={[st.scheduleTitle, { color: colors.text }]}
+                  numberOfLines={1}
+                >
+                  {ev.title}
+                </Text>
+                <Text style={[st.scheduleTime, { color: colors.textSecondary }]}>
+                  {ev.all_day
+                    ? t("calendar.allDay")
+                    : formatTime(ev.start_at)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* --- チャットエリア (別背景色) --- */}
+      <KeyboardAvoidingView
+        style={[st.chatArea, { backgroundColor: chatBg }]}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
+      >
+        <TimelineList
+          familyId={profile?.family_id}
+          onReply={handleReply}
+          memberMap={memberMap}
+        />
+
+        <TimelineComposer
+          replyContext={replyContext}
+          onClearReply={handleClearReply}
           members={members}
-          onPress={handleMemberPress}
         />
-
-        <ScheduleList
-          events={events}
-          title={t("calendar.todaySchedule")}
-          onEventPress={handleEventPress}
-        />
-      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const st = StyleSheet.create({
   safe: { flex: 1 },
-  header: {
+  topBar: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: Spacing.lg,
+    justifyContent: "flex-end",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  greeting: {
-    fontSize: FontSize.xl,
-    fontWeight: "bold",
-  },
-  headerRight: {
+  topBarRight: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.md,
   },
-  loginButton: {
+  iconBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // 今日の予定バー
+  scheduleBar: {
+    paddingVertical: 6,
+  },
+  scheduleScroll: {
+    paddingHorizontal: 12,
+    gap: 8,
+  },
+  scheduleChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  loginText: {
-    color: "#FFFFFF",
-    fontSize: FontSize.sm,
+  scheduleIndicator: {
+    width: 3,
+    height: 14,
+    borderRadius: 1.5,
+  },
+  scheduleTitle: {
+    fontSize: 13,
     fontWeight: "600",
+    maxWidth: 120,
+  },
+  scheduleTime: {
+    fontSize: 11,
+  },
+
+  // チャットエリア
+  chatArea: {
+    flex: 1,
   },
 });

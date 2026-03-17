@@ -51,6 +51,32 @@ export type NotebookPageInsert =
 export type NotebookPageUpdate =
   Database["public"]["Tables"]["notebook_pages"]["Update"];
 
+export type TimelinePostRow =
+  Database["public"]["Tables"]["timeline_posts"]["Row"];
+export type TimelinePostInsert =
+  Database["public"]["Tables"]["timeline_posts"]["Insert"];
+export type TimelineReactionRow =
+  Database["public"]["Tables"]["timeline_reactions"]["Row"];
+
+export type TimelinePostType = "post" | "event" | "diary" | "note";
+
+/** 引用元の要約 (reply_to) */
+export type TimelineReplyTo = Pick<
+  TimelinePostRow,
+  "id" | "body" | "type" | "ref_summary" | "author_id"
+> & {
+  profiles: Pick<ProfileRow, "display_name" | "color"> | null;
+};
+
+export type TimelinePostWithDetails = TimelinePostRow & {
+  profiles: Pick<ProfileRow, "display_name" | "color"> | null;
+  reply_to: TimelineReplyTo | null;
+  /** 楽観的更新中 (未保存) */
+  _optimistic?: boolean;
+  /** 保存失敗 */
+  _error?: boolean;
+};
+
 export type NoteType =
   | "free"
   | "my_letter"
