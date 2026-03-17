@@ -163,7 +163,7 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
   }, [retryPost, post]);
 
   return (
-    <View style={[s.outerRow, isPending && s.pending]}>
+    <View style={s.outerRow}>
       <Animated.View style={[s.replyHint, { opacity: replyIconOpacity }]}>
         <Ionicons name="arrow-undo" size={18} color={colors.primary} />
       </Animated.View>
@@ -273,21 +273,25 @@ export const TimelinePostCard = React.memo(function TimelinePostCard({
               </View>
             </TouchableOpacity>
 
-            {/* 時間 / ステータス */}
-            <View style={[s.statusRow, isOwn ? s.statusRowOwn : s.statusRowOther]}>
-              {isFailed ? (
-                <TouchableOpacity onPress={handleRetry} style={s.errorBtn} hitSlop={8}>
-                  <Ionicons name="alert-circle" size={16} color={colors.error} />
-                </TouchableOpacity>
-              ) : isPending ? (
-                <Ionicons name="time-outline" size={13} color={colors.textSecondary} />
-              ) : null}
-              <Text
-                style={[s.time, { color: isFailed ? colors.error : colors.textSecondary }]}
+            {/* 時間 / ステータス (LINE風: バブルの横に表示) */}
+            {isFailed ? (
+              <TouchableOpacity
+                onPress={handleRetry}
+                style={[s.statusRow, isOwn ? s.statusRowOwn : s.statusRowOther]}
+                hitSlop={8}
               >
-                {isFailed ? t("timeline.sendFailed") : formatTime(post.created_at)}
-              </Text>
-            </View>
+                <Ionicons name="alert-circle" size={14} color={colors.error} />
+                <Text style={[s.time, { color: colors.error }]}>
+                  {t("timeline.sendFailed")}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={[s.statusRow, isOwn ? s.statusRowOwn : s.statusRowOther]}>
+                <Text style={[s.time, { color: colors.textSecondary }]}>
+                  {isPending ? "" : formatTime(post.created_at)}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </Animated.View>
@@ -395,9 +399,6 @@ const s = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
     fontWeight: "500",
-  },
-  pending: {
-    opacity: 0.5,
   },
   statusRow: {
     flexDirection: "row",
